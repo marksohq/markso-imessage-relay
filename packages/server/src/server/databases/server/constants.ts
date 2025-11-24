@@ -56,4 +56,6 @@ export const DEFAULT_DB_ITEMS: { [key: string]: () => any } = {
     landing_page_path: () => "",
     open_findmy_on_startup: () => 1,
     auto_lock_mac: () => 0,
+    server_id: () => "",
+    webhook_id: () => "",
 };

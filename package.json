@@ -1,7 +1,7 @@
 {
-    "name": "bluebubbles-server",
-    "version": "1.9.9",
-    "description": "BlueBubbles Server is the app that powers the BlueBubbles app ecosystem",
+    "name": "imessage-relay-server",
+    "version": "1.0.0",
+    "description": "iMessage Relay Server - Simplified iMessage relay service",
     "private": true,
     "workspaces": [
         "packages/*"

@@ -31,7 +31,8 @@ import {
     WebhookService,
     ScheduledMessagesService,
     OauthService,
-    ZrokService
+    ZrokService,
+    HeartbeatService
 } from "@server/services";
 import { EventCache } from "@server/eventCache";
 import { runTerminalScript, openSystemPreferences, startMessages } from "@server/api/apple/scripts";
@@ -147,6 +148,8 @@ class BlueBubblesServer extends EventEmitter {
 
     oauthService: OauthService;
 
+    heartbeatService: HeartbeatService;
+
     actionHandler: ActionHandler;
 
     eventCache: EventCache;
@@ -234,6 +237,7 @@ class BlueBubblesServer extends EventEmitter {
         this.webhookService = null;
         this.scheduledMessages = null;
         this.oauthService = null;
+        this.heartbeatService = null;
         this.iMessageListener = null;
 
         this.hasSetup = false;
@@ -497,6 +501,13 @@ class BlueBubblesServer extends EventEmitter {
         } catch (ex: any) {
             this.logger.error(`Failed to start Scheduled Message service! ${ex?.message ?? String(ex)}}`);
         }
+
+        try {
+            this.logger.info("Initializing Heartbeat Service...");
+            this.heartbeatService = new HeartbeatService();
+        } catch (ex: any) {
+            this.logger.error(`Failed to initialize Heartbeat service! ${ex?.message ?? String(ex)}}`);
+        }
     }
 
     /**
@@ -537,6 +548,13 @@ class BlueBubblesServer extends EventEmitter {
             await this.scheduledMessages.start();
         } catch (ex: any) {
             this.logger.error(`Failed to start Scheduled Messages service! ${ex?.message ?? String(ex)}}`);
+        }
+
+        try {
+            this.logger.info("Starting Heartbeat service...");
+            this.heartbeatService?.start();
+        } catch (ex: any) {
+            this.logger.error(`Failed to start Heartbeat service! ${ex?.message ?? String(ex)}}`);
         }
 
         const privateApiEnabled = this.repo.getConfig("enable_private_api") as boolean;
@@ -606,6 +624,12 @@ class BlueBubblesServer extends EventEmitter {
             this.logger.error(`Failed to stop Scheduled Messages service! ${ex?.message ?? ex}`);
         }
 
+        try {
+            this.heartbeatService?.stop();
+        } catch (ex: any) {
+            this.logger.error(`Failed to stop Heartbeat service! ${ex?.message ?? ex}`);
+        }
+
         this.logger.info("Finished stopping services...");
     }
 
@@ -664,6 +688,10 @@ class BlueBubblesServer extends EventEmitter {
 
         // Let everyone know the setup is complete
         this.emit("setup-complete");
+
+        // Mark server as started
+        this.hasStarted = true;
+        this.logger.info("Server started successfully");
 
         // After setup is complete, start the update checker
         try {
@@ -880,19 +908,19 @@ class BlueBubblesServer extends EventEmitter {
         this.logger.info("Running post-start checks...");
 
         // Make sure a password is set
-        const password = this.repo.getConfig("password") as string;
-        const tutorialFinished = this.repo.getConfig("tutorial_is_done") as boolean;
-        if (tutorialFinished && isEmpty(password)) {
-            dialog.showMessageBox(this.window, {
-                type: "warning",
-                buttons: ["OK"],
-                title: "BlueBubbles Warning",
-                message: "No Password Set!",
-                detail:
-                    `No password is currently set. BlueBubbles will not function correctly without one. ` +
-                    `Please go to the configuration page, fill in a password, and save the configuration.`
-            });
-        }
+        // const password = this.repo.getConfig("password") as string;
+        // const tutorialFinished = this.repo.getConfig("tutorial_is_done") as boolean;
+        // if (tutorialFinished && isEmpty(password)) {
+        //     dialog.showMessageBox(this.window, {
+        //         type: "warning",
+        //         buttons: ["OK"],
+        //         title: "BlueBubbles Warning",
+        //         message: "No Password Set!",
+        //         detail:
+        //             `No password is currently set. BlueBubbles will not function correctly without one. ` +
+        //             `Please go to the configuration page, fill in a password, and save the configuration.`
+        //     });
+        // }
 
         // Show a warning if the time is off by a reasonable amount (5 seconds)
         try {

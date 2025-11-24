@@ -14,21 +14,27 @@ import {
     Spacer,
     Divider
 } from '@chakra-ui/react';
-import { FiGithub, FiMessageCircle } from 'react-icons/fi';
-import { FaDiscord } from 'react-icons/fa';
+import { FiMessageCircle } from 'react-icons/fi';
 import { AiOutlineHome } from 'react-icons/ai';
-import { MdOutlineAttachMoney, MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md';
-import { WalkthroughLayout } from '../../layouts/walkthrough/WalkthroughLayout'; 
-import logo from '../../../images/logo/icon-64.png';
-
+import { MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md';
+import { SimplifiedSetup } from '../../layouts/setup/SimplifiedSetup';
+import { useAppDispatch } from '../../hooks';
+import { toggleTutorialCompleted } from '../../actions/GeneralActions';
 
 export const Setup = (): JSX.Element => {
+    const dispatch = useAppDispatch();
+
+    const handleSetupComplete = (apiKey: string) => {
+        // TODO: Store API key in Redux store
+        console.log('API Key received:', apiKey);
+        // TODO: Set up connection to Supabase
+        dispatch(toggleTutorialCompleted(true) as any);
+    };
+
     return (
         <Box height="100%">
             <NavBar />
-            <Box p="2">
-                <WalkthroughLayout />
-            </Box>
+            <SimplifiedSetup onSetupComplete={handleSetupComplete} />
         </Box>
     );
 };
@@ -47,34 +53,31 @@ const NavBar = (): JSX.Element => {
             pl={6}
         >
             <Flex alignItems="center" justifyContent='flex-start'>
-                <img src={logo} className="logo" alt="logo" height={48} />
-                <Text fontSize="1xl" ml={2}>BlueBubbles</Text>
+                <Box
+                    w="48px"
+                    h="48px"
+                    borderRadius="full"
+                    bg="blue.500"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    color="white"
+                    fontSize="xl"
+                >
+                    💬
+                </Box>
+                <Text fontSize="1xl" ml={2}>iMessage Relay</Text>
             </Flex>
             <Flex justifyContent='flex-end'>
                 <HStack spacing={{ base: '0', md: '1' }}>
-                    <Tooltip label="Website Home" aria-label="website-tip">
-                        <Link href="https://bluebubbles.app" style={{ textDecoration: 'none' }} target="_blank">
-                            <IconButton size="lg" variant="ghost" aria-label="website" icon={<AiOutlineHome />} />
+                    <Tooltip label="Help & Support" aria-label="help-tip">
+                        <Link href="#" style={{ textDecoration: 'none' }} target="_blank">
+                            <IconButton size="lg" variant="ghost" aria-label="help" icon={<AiOutlineHome />} />
                         </Link>
                     </Tooltip>
-                    <Tooltip label="BlueBubbles Web" aria-label="website-tip">
-                        <Link href="https://bluebubbles.app/web" style={{ textDecoration: 'none' }} target="_blank">
-                            <IconButton size="lg" variant="ghost" aria-label="bluebubbles web" icon={<FiMessageCircle />} />
-                        </Link>
-                    </Tooltip>
-                    <Tooltip label="Support Us" aria-label="donate-tip">
-                        <Link href="https://bluebubbles.app/donate" style={{ textDecoration: 'none' }} target="_blank">
-                            <IconButton size="lg" variant="ghost" aria-label="donate" icon={<MdOutlineAttachMoney />} />
-                        </Link>
-                    </Tooltip>
-                    <Tooltip label="Join our Discord" aria-label="discord-tip">
-                        <Link href="https://discord.gg/yC4wr38" style={{ textDecoration: 'none' }} target="_blank">
-                            <IconButton size="lg" variant="ghost" aria-label="discord" icon={<FaDiscord />} />
-                        </Link>
-                    </Tooltip>
-                    <Tooltip label="Read our Source Code" aria-label="github-tip">
-                        <Link href="https://github.com/BlueBubblesApp" style={{ textDecoration: 'none' }} target="_blank">
-                            <IconButton size="lg" variant="ghost" aria-label="github" icon={<FiGithub />} />
+                    <Tooltip label="Documentation" aria-label="docs-tip">
+                        <Link href="#" style={{ textDecoration: 'none' }} target="_blank">
+                            <IconButton size="lg" variant="ghost" aria-label="docs" icon={<FiMessageCircle />} />
                         </Link>
                     </Tooltip>
                     <Spacer />

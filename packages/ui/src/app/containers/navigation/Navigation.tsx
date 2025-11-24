@@ -104,6 +104,7 @@ export const Navigation = (): JSX.Element => {
     const notifications: Array<NotificationItem> = useAppSelector(state => state.notificationStore.notifications);
     const unreadCount = notifications.filter(e => !e.read).length;
     const dispatch = useAppDispatch();
+    console.log("IN NAV SCREEN!")
 
     return (
         <Box minH="100vh">

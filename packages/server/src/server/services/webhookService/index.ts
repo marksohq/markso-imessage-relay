@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Server } from "@server";
 import { Loggable } from "@server/lib/logging/Loggable";
+import { KeypairService } from "@server/services/keypairService";
 
 export type WebhookEvent = {
     type: string;
@@ -30,6 +31,41 @@ export class WebhookService extends Loggable {
     }
 
     private async sendPost(url: string, event: WebhookEvent) {
-        return await axios.post(url, event, { headers: { "Content-Type": "application/json" } });
+        // Get webhook secret from Keychain (preferred) or config (fallback)
+        let webhookSecret: string | null = null;
+        
+        try {
+            // Try Keychain first (preferred method)
+            webhookSecret = await KeypairService.getWebhookSecret();
+            if (webhookSecret) {
+                this.log.debug("Using webhook secret from Keychain");
+            }
+        } catch (error) {
+            this.log.debug(`Failed to get webhook secret from Keychain: ${error}`);
+        }
+        
+        // Fallback to config if Keychain fails or is empty
+        if (!webhookSecret) {
+            try {
+                webhookSecret = Server().repo.getConfig("webhook_secret") as string;
+                if (webhookSecret) {
+                    this.log.debug("Using webhook secret from config (fallback)");
+                }
+            } catch (error) {
+                this.log.debug(`Failed to get webhook secret from config: ${error}`);
+            }
+        }
+        
+        // Build headers
+        const headers: Record<string, string> = {
+            "Content-Type": "application/json"
+        };
+        
+        // Add webhook secret to headers if available
+        if (webhookSecret) {
+            headers["X-Webhook-Secret"] = `Bearer ${webhookSecret}`;
+        }
+        
+        return await axios.post(url, event, { headers });
     }
 }

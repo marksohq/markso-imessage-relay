@@ -13,6 +13,7 @@ import { getContactPermissionStatus, requestContactPermission } from "@server/ut
 import { ScheduledMessagesInterface } from "@server/api/interfaces/scheduledMessagesInterface";
 import { ChatInterface } from "@server/api/interfaces/chatInterface";
 import { GeneralInterface } from "@server/api/interfaces/generalInterface";
+import { KeypairService } from "@server/services/keypairService";
 import {
     isMinBigSur,
     isMinCatalina,
@@ -76,8 +77,9 @@ export class IPCService extends Loggable {
             }
 
             for (const item of Object.keys(args)) {
-                if (Server().repo.hasConfig(item) && Server().repo.getConfig(item) !== args[item]) {
-                    Server().repo.setConfig(item, args[item]);
+                // Set config if it doesn't exist, or if it exists and the value is different
+                if (!Server().repo.hasConfig(item) || Server().repo.getConfig(item) !== args[item]) {
+                    await Server().repo.setConfig(item, args[item]);
                 }
             }
 
@@ -89,6 +91,278 @@ export class IPCService extends Loggable {
             const cfg = Server().repo?.config;
             const serverInfo = await GeneralInterface.getServerMetadata();
             return { ...cfg, ...serverInfo };
+        });
+
+        ipcMain.handle("keypair-generate", async (_, __) => {
+            try {
+                log.info("Ensuring Curve25519 keypair exists (Keychain storage)...");
+                const result = await KeypairService.ensureKeypair();
+                if (result.isNew) {
+                    log.info("Generated new keypair and stored in Keychain");
+                } else {
+                    log.info("Retrieved existing keypair from Keychain");
+                }
+                return { 
+                    success: true, 
+                    generateKeypair: {
+                        publicKey: result.publicKey,
+                        privateKey: result.privateKey
+                    },
+                    deviceId: result.deviceId,
+                    isNew: result.isNew
+                };
+            } catch (error: any) {
+                log.error(`Failed to ensure keypair: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("keypair-decrypt-sealed", async (event, args) => {
+            try {
+                const { sealedB64 } = args;
+                if (!sealedB64) {
+                    return { success: false, error: "No sealed data provided" };
+                }
+                log.info("Decrypting sealed box with device private key...");
+                const plaintext = await KeypairService.decryptSealedBox(sealedB64);
+                if (!plaintext) {
+                    return { success: false, error: "Decryption failed" };
+                }
+                log.info("Successfully decrypted sealed box");
+                return { success: true, plaintext };
+            } catch (error: any) {
+                log.error(`Failed to decrypt sealed box: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("keypair-clear", async (_, __) => {
+            try {
+                log.info("Clearing keypair from Keychain...");
+                await KeypairService.clearKeypair();
+                return { success: true };
+            } catch (error: any) {
+                log.error(`Failed to clear keypair: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("store-server-password", async (event, args) => {
+            try {
+                const { password } = args;
+                if (!password) {
+                    return { success: false, error: "No password provided" };
+                }
+                log.info("Storing server password in Keychain...");
+                await KeypairService.storeServerPassword(password);
+                return { success: true };
+            } catch (error: any) {
+                log.error(`Failed to store server password: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("get-server-password", async (_, __) => {
+            try {
+                log.info("Retrieving server password from Keychain...");
+                const password = await KeypairService.getServerPassword();
+                return { success: true, password };
+            } catch (error: any) {
+                log.error(`Failed to get server password: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("store-webhook-secret", async (event, args) => {
+            try {
+                const { secret } = args;
+                if (!secret) {
+                    return { success: false, error: "No webhook secret provided" };
+                }
+                log.info("Storing webhook secret in Keychain...");
+                await KeypairService.storeWebhookSecret(secret);
+                return { success: true };
+            } catch (error: any) {
+                log.error(`Failed to store webhook secret: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("get-webhook-secret", async (_, __) => {
+            try {
+                log.info("Retrieving webhook secret from Keychain...");
+                const secret = await KeypairService.getWebhookSecret();
+                return { success: true, secret };
+            } catch (error: any) {
+                log.error(`Failed to get webhook secret: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("clear-server-credentials", async (_, __) => {
+            try {
+                log.info("Clearing server credentials from Keychain...");
+                await KeypairService.clearServerCredentials();
+                return { success: true };
+            } catch (error: any) {
+                log.error(`Failed to clear server credentials: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        });
+
+        ipcMain.handle("register-server-device", async (event, args) => {
+            try {
+                const { url, serverPassword, pubkey_b64, device_id, relay_id } = args;
+
+                if (!url || !serverPassword || !pubkey_b64 || !device_id) {
+                    return { success: false, error: "Missing required parameters" };
+                }
+
+                log.info(`Registering device with server: ${url}`);
+
+                const axios = require('axios');
+                
+                // Build request body
+                const requestBody: any = {
+                    pubkey_b64,
+                    device_id,
+                    relay_id
+                };
+                
+
+                const response = await axios.post(url, requestBody, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${serverPassword}`, // Server password in Authorization header
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    timeout: 30000
+                });
+
+                log.info('Device registration successful');
+                return { 
+                    success: true, 
+                    data: response.data,
+                    status: response.status
+                };
+            } catch (error: any) {
+                log.error(`Device registration failed: ${error.message}`);
+                return {
+                    success: false,
+                    error: error.message,
+                    status: error.response?.status,
+                    data: error.response?.data
+                };
+            }
+        });
+
+        ipcMain.handle("exchange-provision-token", async (event, args) => {
+            try {
+                const { url, token, pubkey_b64, device_name, device_id } = args;
+                
+                log.info(`Exchanging provision token with: ${url}`);
+                
+                const axios = require('axios');
+                const response = await axios.post(url, {
+                    token,
+                    pubkey_b64,
+                    device_name,
+                    device_id
+                }, {
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    timeout: 30000
+                });
+
+                log.info('Token exchange successful');
+                return { 
+                    success: true, 
+                    data: response.data,
+                    status: response.status 
+                };
+            } catch (error: any) {
+                log.error(`Token exchange failed: ${error.message}`);
+                return { 
+                    success: false, 
+                    error: error.message,
+                    status: error.response?.status,
+                    data: error.response?.data
+                };
+            }
+        });
+
+        ipcMain.handle("install-cloudflared-service", async (event, args) => {
+            try {
+                const { tunnelToken } = args;
+                
+                if (!tunnelToken) {
+                    return { success: false, error: "No tunnel token provided" };
+                }
+
+                log.info("Installing cloudflared service...");
+                
+                const { execSync } = require('child_process');
+                const path = require('path');
+                const fs = require('fs');
+                
+                // Path to the install script
+                // __dirname is: packages/server/dist/
+                // Script is at: packages/server/appResources/macos/scripts/install_cloudflared_service.sh
+                // From dist/ go to sibling appResources/ folder
+                const scriptPath = path.join(__dirname, '../appResources/macos/scripts/install_cloudflared_service.sh');
+                
+                log.info(`Looking for install script at: ${scriptPath}`);
+                log.info(`__dirname is: ${__dirname}`);
+                
+                if (!fs.existsSync(scriptPath)) {
+                    log.error(`Install script not found at: ${scriptPath}`);
+                    
+                    // Try alternate path for production
+                    const altPath = path.join(process.resourcesPath || '', 'appResources/macos/scripts/install_cloudflared_service.sh');
+                    log.error(`Also tried: ${altPath}`);
+                    log.error(`Exists: ${fs.existsSync(altPath)}`);
+                    
+                    return { success: false, error: "Install script not found" };
+                }
+
+                // Make script executable
+                fs.chmodSync(scriptPath, '755');
+                
+                // Use osascript to prompt for admin password and run with sudo
+                // This shows the native macOS password prompt
+                const command = `osascript -e 'do shell script "bash \\"${scriptPath}\\" \\"${tunnelToken}\\"" with administrator privileges'`;
+                
+                log.info("Requesting admin privileges for cloudflared installation...");
+                const output = execSync(command, { 
+                    encoding: 'utf-8',
+                    timeout: 60000 
+                });
+                
+                log.info("Cloudflared service installed successfully");
+                log.info(output);
+                
+                return { 
+                    success: true, 
+                    message: "Cloudflared service installed and started",
+                    output 
+                };
+            } catch (error: any) {
+                log.error(`Cloudflared installation failed: ${error.message}`);
+                
+                // Check if user cancelled the password prompt
+                const isCancelled = error.message?.includes('User canceled') || 
+                                   error.message?.includes('(-128)') ||
+                                   error.stderr?.includes('User canceled');
+                
+                return { 
+                    success: false, 
+                    error: error.message,
+                    stderr: error.stderr?.toString(),
+                    cancelled: isCancelled  // Flag to indicate user cancellation
+                };
+            }
         });
 
         ipcMain.handle("get-alerts", async (_, __) => {
@@ -154,9 +428,19 @@ export class IPCService extends Loggable {
         });
 
         ipcMain.handle("create-webhook", async (event, payload) => {
-            const res = await Server().repo.addWebhook(payload.url, payload.events);
-            const output = { id: res.id, url: res.url, events: res.events, created: res.created };
-            return output;
+            try {
+                log.info(`Creating webhook: ${payload.url}`);
+                log.info(`Events: ${JSON.stringify(payload.events)}`);
+                
+                const res = await Server().repo.addWebhook(payload.url, payload.events);
+                const output = { id: res.id, url: res.url, events: res.events, created: res.created };
+                
+                log.info(`Webhook created successfully: ${JSON.stringify(output)}`);
+                return output;
+            } catch (error: any) {
+                log.error(`Failed to create webhook: ${error.message}`);
+                throw error;
+            }
         });
 
         ipcMain.handle("delete-webhook", async (event, args) => {
@@ -361,6 +645,17 @@ export class IPCService extends Loggable {
 
         ipcMain.handle("reset-app", async (_, __) => {
             await Server().stopAll();
+            
+            // Clear ephemeral server credentials from Keychain
+            try {
+                log.info("Clearing server credentials from Keychain...");
+                await KeypairService.clearServerCredentials();
+                log.info("✅ Server credentials cleared from Keychain");
+            } catch (error: any) {
+                log.error(`Failed to clear server credentials: ${error.message}`);
+                // Continue with reset even if Keychain cleanup fails
+            }
+            
             FileSystem.removeDirectory(FileSystem.baseDir);
             await Server().relaunch();
         });
