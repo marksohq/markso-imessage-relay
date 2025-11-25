@@ -4,7 +4,7 @@ import { EventEmitter } from "events";
 import { DataSource } from "typeorm";
 import { Server } from "@server";
 import { isEmpty, isNotEmpty } from "@server/helpers/utils";
-import { Config, Alert, Device, Queue, Webhook, Contact, ContactAddress, ScheduledMessage } from "./entity";
+import { Config, Alert, Device, Queue, Webhook, Contact, ContactAddress, ScheduledMessage, MessageSource } from "./entity";
 import { DEFAULT_DB_ITEMS } from "./constants";
 import { ContactTables1654432080899 } from "./migrations/1654432080899-ContactTables";
 import { ScheduledMessageTable1665083072000 } from "./migrations/1665083072000-ScheduledMessageTable";
@@ -43,7 +43,7 @@ export class ServerRepository extends EventEmitter {
             name: "config",
             type: "better-sqlite3",
             database: dbPath,
-            entities: [Config, Alert, Device, Queue, Webhook, Contact, ContactAddress, ScheduledMessage],
+            entities: [Config, Alert, Device, Queue, Webhook, Contact, ContactAddress, ScheduledMessage, MessageSource],
             migrations: [ContactTables1654432080899, ScheduledMessageTable1665083072000],
             migrationsRun: !shouldSync,
             migrationsTableName: "migrations",
@@ -91,6 +91,13 @@ export class ServerRepository extends EventEmitter {
      */
     webhooks() {
         return this.db.getRepository(Webhook);
+    }
+
+    /**
+     * Get the message sources repo
+     */
+    messageSources() {
+        return this.db.getRepository(MessageSource);
     }
 
     /**
@@ -214,6 +221,56 @@ export class ServerRepository extends EventEmitter {
 
         const webhook = repo.create({ url, events: JSON.stringify(events.map(e => e.value)) });
         return await repo.save(webhook);
+    }
+
+    /**
+     * Store message source for a given message GUID
+     */
+    public async setMessageSource(messageGuid: string, source: string | null): Promise<void> {
+        const repo = this.messageSources();
+        const existing = await repo.findOneBy({ messageGuid });
+        
+        if (existing) {
+            existing.source = source;
+            await repo.save(existing);
+        } else {
+            const messageSource = repo.create({ messageGuid, source });
+            await repo.save(messageSource);
+        }
+    }
+
+    /**
+     * Get message source for a given message GUID
+     */
+    public async getMessageSource(messageGuid: string): Promise<string | null> {
+        const repo = this.messageSources();
+        const messageSource = await repo.findOneBy({ messageGuid });
+        return messageSource?.source || null;
+    }
+
+    /**
+     * Batch get message sources for multiple message GUIDs
+     */
+    public async getMessageSources(messageGuids: string[]): Promise<Map<string, string | null>> {
+        if (messageGuids.length === 0) {
+            return new Map();
+        }
+
+        const repo = this.messageSources();
+        const { In } = await import("typeorm");
+        const sources = await repo.find({
+            where: {
+                messageGuid: In(messageGuids)
+            }
+        });
+
+        const sourceMap = new Map<string, string | null>();
+        for (const guid of messageGuids) {
+            const found = sources.find(s => s.messageGuid === guid);
+            sourceMap.set(guid, found?.source || null);
+        }
+
+        return sourceMap;
     }
 
     public async updateWebhook({

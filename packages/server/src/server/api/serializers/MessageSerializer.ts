@@ -31,6 +31,16 @@ export class MessageSerializer {
         attachmentConfig = DEFAULT_ATTACHMENT_CONFIG,
         isForNotification = false
     }: MessageSerializerMultiParams): Promise<MessageResponse[]> {
+        // Batch fetch all message sources to avoid N+1 queries
+        const messageGuids = messages.map(m => m.guid);
+        let sourceMap: Map<string, string | null> = new Map();
+        try {
+            sourceMap = await Server().repo.getMessageSources(messageGuids);
+        } catch (error) {
+            // If batch lookup fails, fall back to individual lookups (handled in convert)
+            Server().log(`Failed to batch fetch message sources: ${error}`, "warn");
+        }
+
         // Convert the messages to their serialized versions
         const messageResponses: MessageResponse[] = [];
         for (const message of messages) {
@@ -39,7 +49,8 @@ export class MessageSerializer {
                     message: message,
                     config: { ...DEFAULT_MESSAGE_CONFIG, ...config },
                     attachmentConfig: { ...DEFAULT_ATTACHMENT_CONFIG, ...attachmentConfig },
-                    isForNotification
+                    isForNotification,
+                    sourceMap // Pass the pre-fetched source map
                 })
             );
         }
@@ -124,7 +135,8 @@ export class MessageSerializer {
         message,
         config = DEFAULT_MESSAGE_CONFIG,
         attachmentConfig = DEFAULT_ATTACHMENT_CONFIG,
-        isForNotification = false
+        isForNotification = false,
+        sourceMap
     }: MessageSerializerSingleParams): Promise<MessageResponse> {
         let output: MessageResponse = {
             originalROWID: message.ROWID,
@@ -163,6 +175,23 @@ export class MessageSerializer {
             threadOriginatorGuid: message.threadOriginatorGuid,
             hasPayloadData: !!message.payloadData
         };
+
+        // Get source from our database if available
+        // Use pre-fetched sourceMap if available (for batch operations), otherwise fetch individually
+        let messageSource: string | null = null;
+        if (sourceMap) {
+            messageSource = sourceMap.get(message.guid) || null;
+        } else {
+            try {
+                messageSource = await Server().repo.getMessageSource(message.guid);
+            } catch (error) {
+                // If lookup fails, log but don't break serialization
+                Server().log(`Failed to get message source for ${message.guid}: ${error}`, "warn");
+            }
+        }
+        if (messageSource !== null) {
+            output.source = messageSource;
+        }
 
         // Non-essentials
         if (!isForNotification) {

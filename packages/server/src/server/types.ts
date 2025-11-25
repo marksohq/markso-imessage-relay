@@ -75,6 +75,7 @@ export type MessageResponse = {
     didNotifyRecipient?: boolean;
     shareStatus?: number | null;
     shareDirection?: number | null;
+    source?: string | null;
 };
 
 export type HandleResponse = {

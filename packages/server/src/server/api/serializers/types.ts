@@ -35,6 +35,7 @@ export interface MessageSerializerSingleParams {
     config?: MessageSerializerParams;
     attachmentConfig?: AttachmentSerializerParams;
     isForNotification?: boolean;
+    sourceMap?: Map<string, string | null>;
 }
 
 export interface MessageSerializerMultiParams {

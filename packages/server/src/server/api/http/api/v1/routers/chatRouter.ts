@@ -200,7 +200,8 @@ export class ChatRouter {
             tempGuid,
             subject,
             effectId,
-            attributedBody
+            attributedBody,
+            source
         } = body;
 
         const chat = await ChatInterface.create({
@@ -225,9 +226,18 @@ export class ChatRouter {
          });
 
         // Inject the tempGuid back into the messages (if available)
+        // Also store source for the first message (the one that created the chat)
         if (isNotEmpty(tempGuid)) {
             for (const i of data.messages ?? []) {
                 i.tempGuid = tempGuid;
+            }
+        }
+
+        // Store source for the message that created the chat (first message in the chat)
+        if (source !== undefined && source !== null && data.messages && data.messages.length > 0) {
+            const firstMessage = data.messages[0];
+            if (firstMessage.guid) {
+                await Server().repo.setMessageSource(firstMessage.guid, source);
             }
         }
 

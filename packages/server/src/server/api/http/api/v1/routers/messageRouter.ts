@@ -237,7 +237,7 @@ export class MessageRouter {
     static async sendText(ctx: RouterContext, _: Next) {
         let {
             tempGuid, message, attributedBody, method, chatGuid,
-            effectId, subject, selectedMessageGuid, partIndex, ddScan
+            effectId, subject, selectedMessageGuid, partIndex, ddScan, source
         } = ctx?.request?.body ?? {};
 
         // Add to send cache
@@ -258,6 +258,11 @@ export class MessageRouter {
                 ddScan
             });
 
+            // Store source in our database if provided
+            if (source !== undefined && source !== null) {
+                await Server().repo.setMessageSource(sentMessage.guid, source);
+            }
+
             // Remove from cache
             Server().httpService.sendCache.remove(tempGuid);
 
@@ -277,6 +282,7 @@ export class MessageRouter {
             if (isNotEmpty(tempGuid)) {
                 data.tempGuid = tempGuid;
             }
+            // Note: source is automatically included by MessageSerializer from database
 
             if ((data.error ?? 0) !== 0) {
                 throw new IMessageError({
@@ -325,7 +331,7 @@ export class MessageRouter {
 
     static async sendAttachment(ctx: RouterContext, _: Next) {
         const { files } = ctx.request;
-        const { tempGuid, chatGuid, name, method, subject, selectedMessageGuid, partIndex, effectId, isAudioMessage } =
+        const { tempGuid, chatGuid, name, method, subject, selectedMessageGuid, partIndex, effectId, isAudioMessage, source } =
             ctx.request?.body ?? {};
         const attachment = files?.attachment as File;
 
@@ -346,6 +352,11 @@ export class MessageRouter {
                 selectedMessageGuid,
                 partIndex
             });
+
+            // Store source in our database if provided
+            if (source !== undefined && source !== null) {
+                await Server().repo.setMessageSource(sentMessage.guid, source);
+            }
 
             // Remove from cache
             Server().httpService.sendCache.remove(tempGuid);
@@ -399,7 +410,7 @@ export class MessageRouter {
     }
 
     static async sendMultipartMessage(ctx: RouterContext, _: Next) {
-        let { parts, tempGuid, attributedBody, chatGuid, effectId, subject, selectedMessageGuid, partIndex, ddScan } =
+        let { parts, tempGuid, attributedBody, chatGuid, effectId, subject, selectedMessageGuid, partIndex, ddScan, source } =
             ctx?.request?.body ?? {};
 
         // Remove from cache
@@ -419,6 +430,11 @@ export class MessageRouter {
                 partIndex,
                 ddScan
             });
+
+            // Store source in our database if provided
+            if (source !== undefined && source !== null) {
+                await Server().repo.setMessageSource(sentMessage.guid, source);
+            }
 
             // Remove from cache
             Server().httpService.sendCache.remove(tempGuid);
