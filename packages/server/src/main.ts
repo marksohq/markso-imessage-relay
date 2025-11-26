@@ -13,11 +13,12 @@ import { isEmpty, safeTrim } from "@server/helpers/utils";
 import { AppWindow } from "@windows/AppWindow";
 import { AppTray } from "@trays/AppTray";
 import { getLogger } from "@server/lib/logging/Loggable";
+import { autoUpdater } from "electron-updater";
 
 app.commandLine.appendSwitch("in-process-gpu");
 
 // Patch in original user data directory
-app.setPath("userData", app.getPath("userData").replace("@bluebubbles/server", "bluebubbles-server"));
+app.setPath("userData", app.getPath("userData").replace("@bluebubbles/server", "markso-server"));
 
 // Load the config file
 let cfg = {};
@@ -34,10 +35,37 @@ let isHandlingExit = false;
 Server(parsedArgs, null);
 const log = getLogger("Main");
 
+// Configure electron-updater for GitHub releases
+// This will automatically check GitHub releases based on electron-builder config
+if (process.env.NODE_ENV === "production") {
+    autoUpdater.setFeedURL({
+        provider: "github",
+        owner: "marksohq",
+        repo: "markso-imessage-relay"
+    });
+
+    // Set update check interval (optional - UpdateService handles this)
+    // autoUpdater.checkForUpdatesAndNotify();
+
+    // Listen for update events
+    autoUpdater.on("update-available", (info) => {
+        log.info(`Update available: ${info.version}`);
+    });
+
+    autoUpdater.on("update-downloaded", (info) => {
+        log.info(`Update downloaded: ${info.version}`);
+        // Auto-updater will prompt user to restart
+    });
+
+    autoUpdater.on("error", (error) => {
+        log.error(`Auto-updater error: ${error.message}`);
+    });
+}
+
 // Only 1 instance is allowed
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
-    console.error("BlueBubbles is already running! Quiting...");
+    console.error("Markso is already running! Quiting...");
     app.exit(0);
 } else {
     app.on("second-instance", (_, __, ___) => {

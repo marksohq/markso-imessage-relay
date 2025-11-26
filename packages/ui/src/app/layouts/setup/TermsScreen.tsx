@@ -21,7 +21,7 @@ export const TermsScreen: React.FC<TermsScreenProps> = ({ onAccept }) => {
     const textColor = useColorModeValue('gray.800', 'gray.200');
 
     const termsText = `
-IMESSAGE RELAY SERVICE TERMS OF SERVICE
+MARKSO IMESSAGE RELAY SERVICE TERMS OF SERVICE
 
 1. ACCEPTANCE OF TERMS
 By using this iMessage relay service, you agree to be bound by these Terms of Service.
@@ -41,8 +41,7 @@ This service allows you to relay iMessage communications through a Mac device. T
 - The service may be subject to Apple's policies and restrictions
 
 5. PRIVACY AND DATA
-- Your messages are processed locally on your Mac device
-- We do not store or access your personal messages
+- Your messages are stored and processedon Markso's servers
 - API keys are used for authentication only
 
 6. SERVICE AVAILABILITY
@@ -75,7 +74,7 @@ These terms are governed by the laws of the jurisdiction in which the service pr
         >
             <VStack spacing={6} maxW="800px" w="100%">
                 <Heading size="2xl" textAlign="center" color={textColor}>
-                    Welcome to iMessage Relay
+                    Welcome to Markso Relay
                 </Heading>
                 
                 <Text fontSize="lg" textAlign="center" color={textColor}>

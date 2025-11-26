@@ -84,13 +84,13 @@ ServerLog.transports.file.format = logFormat;
 
 // Patch in the original package path so we don't use @bluebubbles/server
 ServerLog.transports.file.resolvePath = () =>
-    path.join(os.homedir(), "Library", "Logs", "bluebubbles-server", "main.log");
+    path.join(os.homedir(), "Library", "Logs", "markso-server", "main.log");
 
 /**
  * Create a singleton for the server so that it can be referenced everywhere.
  * Plus, we only want one instance of it running at all times.
  */
-let server: BlueBubblesServer = null;
+let server: MarksoServer = null;
 export const Server = (args: Record<string, any> = {}, win: BrowserWindow = null) => {
     // If we already have a server, update the window (if not null) and return
     // the same instance
@@ -100,7 +100,7 @@ export const Server = (args: Record<string, any> = {}, win: BrowserWindow = null
     }
 
     // Only use args when instantiating a new server object
-    server = new BlueBubblesServer(args, win);
+    server = new MarksoServer(args, win);
     return server;
 };
 
@@ -109,8 +109,8 @@ export const Server = (args: Record<string, any> = {}, win: BrowserWindow = null
  * This will handle all services and helpers that get spun
  * up when running the application.
  */
-class BlueBubblesServer extends EventEmitter {
-    logger = getLogger("BlueBubblesServer");
+class MarksoServer extends EventEmitter {
+    logger = getLogger("MarksoServer");
 
     args: Record<string, any>;
 
@@ -412,10 +412,10 @@ class BlueBubblesServer extends EventEmitter {
             const dialogOpts: MessageBoxOptions = {
                 type: "error",
                 buttons: ["Restart", "Open System Preferences", "Ignore"],
-                title: "BlueBubbles Error",
+                title: "Markso Error",
                 message: "Full-Disk Access Permission Required!",
                 detail:
-                    `In order to function correctly, BlueBubbles requires full-disk access. ` +
+                    `In order to function correctly, Markso requires full-disk access. ` +
                     `Please enable Full-Disk Access in System Preferences > Security & Privacy.`
             };
 
@@ -914,10 +914,10 @@ class BlueBubblesServer extends EventEmitter {
         //     dialog.showMessageBox(this.window, {
         //         type: "warning",
         //         buttons: ["OK"],
-        //         title: "BlueBubbles Warning",
+        //         title: "Markso Warning",
         //         message: "No Password Set!",
         //         detail:
-        //             `No password is currently set. BlueBubbles will not function correctly without one. ` +
+        //             `No password is currently set. Markso will not function correctly without one. ` +
         //             `Please go to the configuration page, fill in a password, and save the configuration.`
         //     });
         // }
@@ -953,7 +953,7 @@ class BlueBubblesServer extends EventEmitter {
         if (contactStatus === "Denied") {
             this.logger.debug(
                 "Contacts authorization status is denied! You may need to manually " +
-                    "allow BlueBubbles to access your contacts."
+                    "allow Markso to access your contacts."
             );
         } else {
             this.logger.debug(`Contacts authorization status: ${contactStatus}`);
@@ -965,8 +965,8 @@ class BlueBubblesServer extends EventEmitter {
             const mfHelperExists = await FileSystem.processIsRunning("MacForgeHelper");
             if (mfExists || mfHelperExists) {
                 this.logger.warn(
-                    "MacForge detected! BlueBubbles no longer requires MacForge, " +
-                        "and it may cause issues running it alongside BlueBubbles. We " +
+                    "MacForge detected! Markso no longer requires MacForge, " +
+                        "and it may cause issues running it alongside Markso. We " +
                         "recommend uninstalling MacForge and then rebooting your Mac."
                 );
             }
@@ -1267,14 +1267,14 @@ class BlueBubblesServer extends EventEmitter {
             {
                 name: "Accessibility (Optional)",
                 pass: systemPreferences.isTrustedAccessibilityClient(false),
-                solution: "Open System Preferences > Security > Privacy > Accessibility, then add BlueBubbles"
+                solution: "Open System Preferences > Security > Privacy > Accessibility, then add Markso"
             },
             {
                 name: "Full Disk Access",
                 pass: this.hasDiskAccess,
                 solution:
                     "Open System Preferences > Security > Privacy > Full Disk Access, " +
-                    "then add BlueBubbles. Lastly, restart BlueBubbles."
+                    "then add Markso. Lastly, restart Markso."
             }
         ];
 

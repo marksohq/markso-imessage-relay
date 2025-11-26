@@ -1,11 +1,9 @@
 import React from 'react';
 
 import './App.css';
-import { Navigation } from './containers/navigation/Navigation';
 import { Setup } from './containers/setup/Setup';
 import { useAppSelector } from './hooks';
 import { SimplifiedNavigation } from './containers/navigation/SimplifiedNavigation';
-// import { SimplifiedNavigation } from './containers/navigation/SimplifiedNavigation';
 
 const App = (): JSX.Element => {
     const isSetupComplete: boolean = useAppSelector(state => state.config.tutorial_is_done) ?? false;

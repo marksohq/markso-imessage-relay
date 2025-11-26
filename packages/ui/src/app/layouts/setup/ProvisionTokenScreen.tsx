@@ -32,7 +32,8 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
     const [provisionToken, setProvisionToken] = useState('');
     const [isConnecting, setIsConnecting] = useState(false);
     const [error, setError] = useState('');
-    const [showProvisionToken, setShowProvisionToken] = useState(false);
+    const [statusText, setStatusText] = useState('');
+    // const [showProvisionToken, setShowProvisionToken] = useState(false);
     
     const bgColor = useColorModeValue('gray.50', 'gray.900');
     const cardBg = useColorModeValue('white', 'gray.800');
@@ -49,6 +50,13 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
         setError('');
 
         try {
+            // Get API base URL from environment variable (injected at build time)
+            // Defaults: dev = ngrok URL, production = api.nurture.markso.io
+            const defaultUrl = process.env.NODE_ENV === 'production' 
+                ? 'https://api.nurture.markso.io'
+                : 'https://usable-uniquely-kit.ngrok-free.app';
+            const apiBaseUrl = (process.env.API_BASE_URL || defaultUrl).replace(/\/$/, '');
+
             // 1. Generate keypair (or retrieve existing)
             const keypairResult = await ipcRenderer.invoke('keypair-generate');
             if (!keypairResult.success) {
@@ -67,7 +75,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
             // 2. Call exchange
             console.log('🌐 Exchanging token with server...');
             const exchangeResponse = await ipcRenderer.invoke('exchange-provision-token', {
-                url: 'https://usable-uniquely-kit.ngrok-free.app/api/provision/exchange',
+                url: `${apiBaseUrl}/api/provision/exchange`,
                 token: provisionToken,
                 pubkey_b64: publicKey,
                 device_name: deviceName,
@@ -80,7 +88,6 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
             }
 
             const configData = exchangeResponse.data;
-            console.log('✅ EXCHANGE DATA:', configData);
             
             // 3. Decrypt password, tunnel token, and webhook secret
             console.log('🔓 Decrypting sealed secrets...');
@@ -114,37 +121,38 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
             
             // 4. Install cloudflared with tunnel token
             console.log('🚇 Installing cloudflared tunnel service...');
-            setError('Installing cloudflared tunnel... (admin password required)');
+            setStatusText('Installing cloudflared tunnel... (admin password required)');
             
-            let installResult = await ipcRenderer.invoke('install-cloudflared-service', {
+            const installResult = await ipcRenderer.invoke('install-cloudflared-service', {
                 tunnelToken
             });
             
             // Handle admin password cancellation
-            while (!installResult.success && installResult.cancelled) {
-                console.log('⚠️  User cancelled admin prompt, asking to retry...');
-                setError('Admin password required. Click "Connect" to retry.');
-                setIsConnecting(false);
+            // while (!installResult.success && installResult.cancelled) {
+            //     console.log('⚠️  User cancelled admin prompt, asking to retry...');
+            //     setError('Admin password required. Click "Connect" to retry.');
+            //     setIsConnecting(false);
                 
-                await new Promise(resolve => {
-                    const retryButton = document.querySelector('button[type="submit"]');
-                    if (retryButton) {
-                        retryButton.addEventListener('click', resolve, { once: true });
-                    } else {
-                        setTimeout(resolve, 1000);
-                    }
-                });
+            //     await new Promise(resolve => {
+            //         const retryButton = document.querySelector('button[type="submit"]');
+            //         if (retryButton) {
+            //             retryButton.addEventListener('click', resolve, { once: true });
+            //         } else {
+            //             setTimeout(resolve, 1000);
+            //         }
+            //     });
                 
-                setIsConnecting(true);
-                setError('Installing cloudflared tunnel... (admin password required)');
+            //     setIsConnecting(true);
+            //     setError('Installing cloudflared tunnel... (admin password required)');
                 
-                installResult = await ipcRenderer.invoke('install-cloudflared-service', {
-                    tunnelToken
-                });
-            }
+            //     installResult = await ipcRenderer.invoke('install-cloudflared-service', {
+            //         tunnelToken
+            //     });
+            // }
             
             if (!installResult.success) {
                 console.error('❌ Cloudflared installation failed:', installResult.error);
+                setStatusText('');
                 throw new Error(`Failed to install cloudflared: ${installResult.error}`);
             }
             
@@ -180,7 +188,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
             }
 
             const confirmResponse = await ipcRenderer.invoke('register-server-device', {
-                url: `https://usable-uniquely-kit.ngrok-free.app/api/provision/register`,
+                url: `${apiBaseUrl}/api/provision/register`,
                 serverPassword: serverPassword,
                 pubkey_b64: publicKey,
                 device_id: deviceId,
@@ -195,8 +203,8 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
             }            
             
             // 7. Register webhook
-            // const webhookUrl = `https://usable-uniquely-kit.ngrok-free.app/api/webhook/relay?webhook_id=${configData.webhook_id}`;
-            const webhookUrl = `https://usable-uniquely-kit.ngrok-free.app/api/webhook/relay/${configData.webhook_id}`;
+            // Build webhook URL using API base URL
+            const webhookUrl = `${apiBaseUrl}/api/webhook/relay/${configData.webhook_id}`;
             console.log('🔗 Webhook URL:', webhookUrl);
             
             try {
@@ -225,8 +233,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
                 webhook_secret_stored_in_keychain: true
             });
             
-            const newConfig = await ipcRenderer.invoke('get-config');
-            console.log('✅ NEW CONFIG:', newConfig);
+            // const newConfig = await ipcRenderer.invoke('get-config');
             
             // 8. Send confirmation to server
             console.log('📡 Sending setup confirmation to server...');
@@ -250,7 +257,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
         } finally {
             setIsConnecting(false);
         }
-    }
+    };
 
     const handleConnect = async () => {
         // Call the new secure function
@@ -278,7 +285,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
         >
             <VStack spacing={8} maxW="500px" w="100%">
                 {/* Logo/Icon */}
-                <Box
+                {/* <Box
                     w="80px"
                     h="80px"
                     borderRadius="full"
@@ -290,7 +297,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
                     fontSize="2xl"
                 >
                     💬
-                </Box>
+                </Box> */}
 
                 {/* Welcome Card */}
                 <Box
@@ -308,19 +315,19 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
                         </Heading>
                         
                         <Text fontSize="lg" textAlign="center" color="gray.600">
-                            Login With Provision Token
+                            Connect With Authentication Token
                         </Text>
 
                         <VStack spacing={4} w="100%">
                             <Text fontSize="sm" color="gray.600" textAlign="center">
-                                Enter your provision token to connect to the iMessage relay service
+                                Enter your authentication token to connect to the Markso relay service
                             </Text>
 
                             <InputGroup>
                                 <Input
                                     // type={showProvisionToken ? 'text' : 'password'}
                                     type="text"
-                                    placeholder="Enter your provision token"
+                                    placeholder="Enter your authentication token"
                                     value={provisionToken}
                                     onChange={(e) => setProvisionToken(e.target.value)}
                                     size="lg"
@@ -352,6 +359,17 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
                                     <Text fontSize="sm">{error}</Text>
                                 </Alert>
                             )}
+
+                            {
+                                statusText && (
+                                    <Alert status="info" borderRadius="md">
+                                        <AlertIcon />
+                                        <Text fontSize="sm">
+                                            {statusText}
+                                        </Text>
+                                    </Alert>
+                                )
+                            }
 
                             <HStack spacing={4} w="100%">
                                 <Button
@@ -387,7 +405,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
 
                 {/* Help Text */}
                 <Text fontSize="sm" color="gray.500" textAlign="center">
-                    Don't have a provision token? Get one from your dashboard.
+                    Don't have an authentication token? Get one from your dashboard.
                 </Text>
             </VStack>
         </Box>

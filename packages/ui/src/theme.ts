@@ -4,7 +4,7 @@ import { useAppSelector } from './app/hooks';
 
 export const baseTheme = {
     config: {
-        initialColorMode: 'system',
+        initialColorMode: 'light',
         useSystemColorMode: false
     },
     styles: {

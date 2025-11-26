@@ -40,11 +40,11 @@ export class OauthService extends Loggable {
 
     expiresIn: number;
 
-    projectName = "BlueBubbles";
+    projectName = "Markso";
 
     private clientId = "500464701389-os4g4b8mfoj86vujg4i61dmh9827qbrv.apps.googleusercontent.com";
 
-    private _packageName = "com.bluebubbles.messaging";
+    private _packageName = "com.markso.messaging";
 
     private firebaseScopes = [
         "https://www.googleapis.com/auth/cloudplatformprojects",
@@ -89,7 +89,7 @@ export class OauthService extends Loggable {
         this.koaApp.use(async (ctx, _) => {
             if (ctx.path === "/oauth/callback") {
                 this.log.info("Received OAuth callback");
-                ctx.body = "Success! You can close this window and return to the BlueBubbles Server app";
+                ctx.body = "Success! You can close this window and return to the Markso Server app";
                 ctx.status = 200;
             } else {
                 ctx.body = "Not found";
@@ -249,7 +249,7 @@ export class OauthService extends Loggable {
             }
 
             // Mark the service as completed
-            this.log.info('Successfully synced your Google Contacts to the BlueBubbles Server!');
+            this.log.info('Successfully synced your Google Contacts to the Markso Server!');
             this.setStatus(ProgressStatus.COMPLETED);
 
             // Shutdown the service
@@ -464,7 +464,7 @@ export class OauthService extends Loggable {
         this.log.info(
             `You must manually create the Firebase project! In 10 seconds, ` +
                 `a window will open where you can create a new project. ` +
-                `Select your existing BlueBubbles Resource and add Firebase to the project. ` +
+                `Select your existing Markso Resource and add Firebase to the project. ` +
                 `Once the project is created, you can close the window and setup will continue.`
         );
 
@@ -702,7 +702,7 @@ export class OauthService extends Loggable {
 
     async createSecurityRules(projectId: string) {
         // Uninitialize the app if it exists
-        const appName = "BlueBubbles-OAuth";
+        const appName = "Markso-OAuth";
         const existingApp = admin.apps.find(app => app.name === appName);
         if (existingApp) await existingApp.delete();
 

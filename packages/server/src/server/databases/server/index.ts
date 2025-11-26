@@ -35,7 +35,7 @@ export class ServerRepository extends EventEmitter {
 
         let dbPath = `${app.getPath("userData")}/config.db`;
         if (isDev) {
-            dbPath = `${app.getPath("userData")}/bluebubbles-server/config.db`;
+            dbPath = `${app.getPath("userData")}/markso-server/config.db`;
         }
 
         const shouldSync = !fs.existsSync(dbPath) || isDev;

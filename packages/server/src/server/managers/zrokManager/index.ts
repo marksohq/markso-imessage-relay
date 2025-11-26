@@ -131,7 +131,7 @@ export class ZrokManager extends Loggable {
                 headers: {
                     "Content-Type": "application/zrok.v1+json",
                     Accept: "application/zrok.v1+json",
-                    "User-Agent": `BlueBubbles Server/${app.getVersion()}`,
+                    "User-Agent": `Markso Server/${app.getVersion()}`,
                     "Accept-Encoding": "gzip",
                     Host: "api.zrok.io"
                 }

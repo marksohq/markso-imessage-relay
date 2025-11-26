@@ -45,7 +45,6 @@ export const SimplifiedNavigation = (): JSX.Element => {
         // Check for inbound messages - matches "New Message from +" followed by any phone number
         const isInboundMessage = message.includes('new message from +');
         const isOutboundMessage = message.includes('delivered message from [you]:');
-        console.log("LOG:", message, isInboundMessage, isOutboundMessage);
         return isOutboundMessage || 
                isInboundMessage;
     });
@@ -134,7 +133,7 @@ export const SimplifiedNavigation = (): JSX.Element => {
                         </Box> */}
                         <VStack align="start" spacing={1}>
                             <Heading size="xl" color={textColor}>
-                                Markso Relay
+                                Markso Relay Server
                             </Heading>
                             <Text fontSize="sm" color="gray.500">
                                 v1.0.0
@@ -293,7 +292,7 @@ export const SimplifiedNavigation = (): JSX.Element => {
 
                 {/* Footer */}
                 <HStack spacing={4} color="gray.500" fontSize="sm">
-                    <Text>© 2025 Markso Relay. All rights reserved.</Text>
+                    <Text>© 2025 Markso. All rights reserved.</Text>
                 </HStack>
             </VStack>
 

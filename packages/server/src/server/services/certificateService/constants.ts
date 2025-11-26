@@ -17,7 +17,7 @@ export const certSubject = [
     },
     {
         name: "organizationName",
-        value: "BlueBubbles"
+        value: "marksohq"
     },
     {
         shortName: "OU",

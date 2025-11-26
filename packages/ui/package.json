@@ -1,11 +1,11 @@
 {
-  "name": "@imessage-relay/ui",
+  "name": "@markso-imessage-relay/ui",
   "version": "1.0.0",
   "homepage": "./",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "export BROWSER=none && react-app-rewired start",
-    "build": "export NODE_ENV=production && react-app-rewired build"
+    "start": "export BROWSER=none && export API_BASE_URL=${API_BASE_URL:-https://usable-uniquely-kit.ngrok-free.app} && react-app-rewired start",
+    "build": "export NODE_ENV=production && export API_BASE_URL=${API_BASE_URL:-https://api.nurture.markso.io} && react-app-rewired build"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

@@ -1,6 +1,6 @@
-owner: BlueBubblesApp
-repo: bluebubbles-server
+owner: marksohq
+repo: markso-imessage-relay
 provider: github
 private: false
 releaseType: draft
-updaterCacheDirName: '@bluebubblesserver-updater'
+updaterCacheDirName: '@markso-updater'

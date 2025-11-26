@@ -194,7 +194,7 @@ export class PrivateApiService extends Loggable {
                 });
 
                 socket.on("error", err => {
-                    this.log.debug("An error occured in a BlueBubbles Private API Helper connection! Closing...");
+                    this.log.debug("An error occured in a Markso Private API Helper connection! Closing...");
                     this.log.debug(String(err));
                     socket.destroy();
                 });
@@ -219,7 +219,7 @@ export class PrivateApiService extends Loggable {
 
     async onEvent(eventRaw: string, socket: net.Socket): Promise<void> {
         if (eventRaw == null) {
-            this.log.info(`Received null data from BlueBubblesHelper!`);
+            this.log.info(`Received null data from MarksoHelper!`);
             return;
         }
 
@@ -229,23 +229,23 @@ export class PrivateApiService extends Loggable {
         for (const event of uniqueEvents) {
             if (!event || event.trim().length === 0) continue;
             if (event == null) {
-                this.log.info(`Failed to decode null BlueBubblesHelper data!`);
+                this.log.info(`Failed to decode null MarksoHelper data!`);
                 continue;
             }
 
-            // this.log.info(`Received data from BlueBubblesHelper: ${event}`, "debug");
+            // this.log.info(`Received data from MarksoHelper: ${event}`, "debug");
             let data;
 
             // Handle in a timeout so that we handle each event asyncronously
             try {
                 data = JSON.parse(event);
             } catch (e) {
-                this.log.info(`Failed to decode BlueBubblesHelper data! ${event}, ${e}`);
+                this.log.info(`Failed to decode MarksoHelper data! ${event}, ${e}`);
                 return;
             }
 
             if (data == null) {
-                this.log.warn("BlueBubblesHelper sent null data");
+                this.log.warn("MarksoHelper sent null data");
                 return;
             }
 

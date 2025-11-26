@@ -1,5 +1,5 @@
 {
-    "name": "imessage-relay-server",
+    "name": "markso-imessage-relay",
     "version": "1.0.0",
     "description": "iMessage Relay Server - Simplified iMessage relay service",
     "private": true,
@@ -7,8 +7,8 @@
         "packages/*"
     ],
     "scripts": {
-        "start": "concurrently \"cd ./packages/ui && npm run start\" \"cd ./packages/server && npm run start\"",
-        "build-ui": "cd ./packages/ui && npm run build && mkdir -p ../server/dist/static && rm -rf ../server/dist/static && cp -R ./build/** ../server/dist/ && cd ../../",
+        "start": "export API_BASE_URL=${API_BASE_URL:-https://usable-uniquely-kit.ngrok-free.app} && concurrently \"cd ./packages/ui && npm run start\" \"cd ./packages/server && npm run start\"",
+        "build-ui": "export API_BASE_URL=${API_BASE_URL:-https://api.nurture.markso.io} && cd ./packages/ui && npm run build && mkdir -p ../server/dist/static && rm -rf ../server/dist/static && cp -R ./build/** ../server/dist/ && cd ../../",
         "build-server": "cd ./packages/server && npm run dist && cd ../../",
         "release-server": "cd ./packages/server && npm run release && cd ../../",
         "build": "npm run build-ui && npm run build-server && rm -rf ./dist && mkdir -p ./dist && cp -R ./packages/server/releases/* ./dist/ && rm -rf ./packages/server/releases/ && rm -rf ./packages/ui/build/",

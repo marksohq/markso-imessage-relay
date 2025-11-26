@@ -1,8 +1,8 @@
 // NOTE: All paths are relative to the package.json that will be loading this configuration file.
 // Making them relative to the scripts folder will break the commands
 module.exports = {
-    "productName": "BlueBubbles",
-    "appId": "com.BlueBubbles.BlueBubbles-Server",
+    "productName": "Markso",
+    "appId": "com.markso.markso-imessage-relay",
     "npmRebuild": true,
     "directories": {
         "output": "releases",
@@ -17,8 +17,8 @@ module.exports = {
         "publish": [
             {
                 "provider": "github",
-                "repo": "bluebubbles-server",
-                "owner": "BlueBubblesApp",
+                "repo": "markso-imessage-relay",
+                "owner": "marksohq",
                 "private": false,
                 "channel": "latest",
                 "releaseType": "draft",
@@ -42,9 +42,9 @@ module.exports = {
         "entitlements": "./scripts/entitlements.mac.plist",
         "entitlementsInherit": "./scripts/entitlements.mac.plist",
         "extendInfo": {
-            "NSContactsUsageDescription": "BlueBubbles needs access to your Contacts",
-            "NSAppleEventsUsageDescription": "BlueBubbles needs access to run AppleScripts",
-            "NSSystemAdministrationUsageDescription": "BlueBubbles needs access to manage your system",
+            "NSContactsUsageDescription": "Markso needs access to your Contacts",
+            "NSAppleEventsUsageDescription": "Markso needs access to run AppleScripts",
+            "NSSystemAdministrationUsageDescription": "Markso needs access to manage your system",
         },
         "gatekeeperAssess": false,
         "minimumSystemVersion": "10.11.0",

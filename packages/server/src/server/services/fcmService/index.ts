@@ -11,7 +11,7 @@ import { AsyncSingleton } from "@server/lib/decorators/AsyncSingletonDecorator";
 import { AsyncRetryer } from "@server/lib/decorators/AsyncRetryerDecorator";
 import { ProxyServices } from "@server/databases/server/constants";
 
-const AppName = "BlueBubbles";
+const AppName = "Markso";
 
 enum DbType {
     UNKNOWN = "unknown",

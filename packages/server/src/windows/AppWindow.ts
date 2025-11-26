@@ -35,7 +35,7 @@ export class AppWindow extends Window {
         }
 
         this.instance = new BrowserWindow({
-            title: "BlueBubbles Server",
+            title: "Markso Server",
             useContentSize: true,
             width: 1080,
             minWidth: 850,
@@ -68,7 +68,7 @@ export class AppWindow extends Window {
             this.instance = null;
         });
 
-        // Prevent the title from being changed from BlueBubbles
+        // Prevent the title from being changed from Markso
         this.instance.on("page-title-updated", evt => {
             evt.preventDefault();
         });

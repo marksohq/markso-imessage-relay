@@ -156,6 +156,12 @@ ipcRenderer.on('update-available', (_: any, data: any) => {
     }));
 });
 
+// Force light mode on startup (override any existing localStorage value)
+// Chakra UI stores color mode in localStorage with key 'chakra-ui-color-mode'
+if (typeof window !== 'undefined' && window.localStorage) {
+    localStorage.setItem('chakra-ui-color-mode', 'light');
+}
+
 const domNode = document.getElementById('root')!;
 const root = createRoot(domNode);
 

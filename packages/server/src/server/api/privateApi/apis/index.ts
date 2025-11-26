@@ -15,7 +15,7 @@ export class PrivateApiAction extends Loggable {
 
     throwForBadStatus() {
         if (!this.api.helper || !this.api.server) {
-            throw new Error("Failed to invoke Private API! Error: BlueBubblesHelper is not running!");
+            throw new Error("Failed to invoke Private API! Error: MarksoHelper is not running!");
         }
     }
 

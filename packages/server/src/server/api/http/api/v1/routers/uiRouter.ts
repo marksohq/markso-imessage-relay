@@ -13,9 +13,9 @@ export class UiRouter {
                 ctx,
                 `
                 <html>
-                    <title>BlueBubbles Server</title>
+                    <title>Markso Server</title>
                     <body>
-                        <h4>Welcome to the BlueBubbles Server landing page!</h4>
+                        <h4>Welcome to the Markso Server landing page!</h4>
                     </body>
                 </html>
             `
@@ -33,7 +33,7 @@ export class UiRouter {
             ctx,
             `
                 <html>
-                    <title>BlueBubbles Server</title>
+                    <title>Markso Server</title>
                     <body>
                         <h4>[WARNING] Custom landing page not found!</h4>
                     </body>

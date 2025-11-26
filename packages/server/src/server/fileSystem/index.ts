@@ -34,7 +34,7 @@ const FindProcess = require("find-process");
 const { rimrafSync } = require("rimraf");
 
 // Patch in original user data directory
-app.setPath("userData", app.getPath("userData").replace("@bluebubbles/server", "bluebubbles-server"));
+app.setPath("userData", app.getPath("userData").replace("@bluebubbles/server", "markso-server"));
 
 // Directory modifiers based on the environment
 let subdir = "";
@@ -42,7 +42,7 @@ let moddir = "app.asar.unpacked";
 let appPath = __dirname.replace("/app.asar/dist", "");
 if (process.env.NODE_ENV !== "production") {
     appPath = __dirname.replace("/dist", "");
-    subdir = "bluebubbles-server";
+    subdir = "markso-server";
     moddir = "";
 }
 
@@ -57,7 +57,7 @@ export const userHomeDir = () => {
 export class FileSystem {
     public static baseDir = path.join(app.getPath("userData"), subdir);
 
-    public static cfgFile = path.join(userHomeDir(), "bluebubbles.yml");
+    public static cfgFile = path.join(userHomeDir(), "markso.yml");
 
     public static attachmentsDir = path.join(FileSystem.baseDir, "Attachments");
 
@@ -68,7 +68,7 @@ export class FileSystem {
         "Library",
         "Messages",
         "Attachments",
-        "BlueBubbles"
+        "Markso"
     );
 
     public static attachmentCacheDir = path.join(FileSystem.baseDir, "Attachments", "Cached");
@@ -728,10 +728,10 @@ export class FileSystem {
     <dict>
         <key>AssociatedBundleIdentifiers</key>
         <array>
-            <string>com.BlueBubbles.BlueBubbles-Server</string>
+            <string>com.markso.markso-imessage-relay</string>
         </array>
         <key>Label</key>
-        <string>com.bluebubbles.server</string>
+        <string>com.markso.server</string>
         <key>Program</key>
         <string>${appPath}</string>
         <key>RunAtLoad</key>
@@ -746,7 +746,7 @@ export class FileSystem {
     </dict>
 </plist>`;
 
-        const plistName = "com.bluebubbles.server";
+        const plistName = "com.markso.server";
         const filePath = path.join(userHomeDir(), "Library", "LaunchAgents", `${plistName}.plist`);
         if (!fs.existsSync(filePath)) {
             fs.writeFileSync(filePath, plist);
@@ -768,7 +768,7 @@ export class FileSystem {
     }
 
     static async removeLaunchAgent(): Promise<void> {
-        const plistName = "com.bluebubbles.server";
+        const plistName = "com.markso.server";
         const filePath = path.join(userHomeDir(), "Library", "LaunchAgents", `${plistName}.plist`);
 
         // Disable should stop the service from starting on boot

@@ -56,7 +56,7 @@ export class UpdateService extends Loggable {
 
         try {
             releasesRes = await axios.get(
-                "https://api.github.com/repos/BlueBubblesApp/bluebubbles-server/releases",
+                "https://api.github.com/repos/marksohq/markso-imessage-relay/releases",
                 {
                     headers: {
                         Accept: "application/vnd.github.v3+json"
@@ -72,7 +72,7 @@ export class UpdateService extends Loggable {
             !x.prerelease &&
             !x.draft &&
             x.tag_name.match(/v\d+\.\d+\.\d+/) &&
-            x.assets.some((y: any) => y.name.startsWith('BlueBubbles-') && y.name.endsWith('.dmg'))
+            x.assets.some((y: any) => y.name.startsWith('Markso-') && y.name.endsWith('.dmg'))
         );
         if (!releases || releases.length === 0) return false;
     
@@ -92,8 +92,8 @@ export class UpdateService extends Loggable {
 
             if (showUpdateDialog) {
                 const notification = {
-                    title: "BlueBubbles Update Available!",
-                    body: `BlueBubbles macOS Server v${latestVersion} is now available to be installed!`
+                    title: "Markso Update Available!",
+                    body: `Markso macOS Server v${latestVersion} is now available to be installed!`
                 };
                 new Notification(notification).show();
             }
@@ -102,9 +102,9 @@ export class UpdateService extends Loggable {
         if (!this.hasUpdate && showNoUpdateDialog) {
             const dialogOpts: MessageBoxOptions = {
                 type: "info",
-                title: "BlueBubbles Update",
+                title: "Markso Update",
                 message: "You have the latest version installed!",
-                detail: `You are running the latest version of BlueBubbles! v${this.currentVersion}`
+                detail: `You are running the latest version of Markso! v${this.currentVersion}`
             };
 
             dialog.showMessageBox(this.window, dialogOpts);
