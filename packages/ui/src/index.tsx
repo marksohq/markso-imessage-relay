@@ -156,6 +156,19 @@ ipcRenderer.on('update-available', (_: any, data: any) => {
     }));
 });
 
+// Handle relay server not found (deleted)
+ipcRenderer.on('relay-server-not-found', (_: any, data: any) => {
+    console.warn('Relay server not found:', data);
+    // Show alert
+    store.dispatch(addAlert({
+        id: Date.now(),
+        message: data.message || 'Your relay server no longer exists. Please set up a new relay server.',
+        type: 'error',
+        timestamp: new Date(),
+        read: false
+    }));
+});
+
 // Force light mode on startup (override any existing localStorage value)
 // Chakra UI stores color mode in localStorage with key 'chakra-ui-color-mode'
 if (typeof window !== 'undefined' && window.localStorage) {

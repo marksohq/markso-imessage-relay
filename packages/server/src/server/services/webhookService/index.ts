@@ -21,12 +21,62 @@ export class WebhookService extends Loggable {
             if (!eventTypes.includes("*") && !eventTypes.includes(event.type)) continue;
             this.log.debug(`Dispatching event to webhook: ${i.url}`);
 
-            // We don't need to await this
-            this.sendPost(i.url, event).catch(ex => {
-                this.log.debug(`Failed to dispatch "${event.type}" event to webhook: ${i.url}`);
-                this.log.debug(`  -> Error: ${ex?.message ?? String(ex)}`);
-                this.log.debug(`  -> Status Text: ${ex?.response?.statusText}`);
-            });
+            // For heartbeat events, we need to check the response for relay server deletion
+            if (event.type === "heartbeat") {
+                this.sendPost(i.url, event)
+                    .then(response => {
+                        // Check response data for relay server deletion error
+                        // Response could be JSON object, string, or nested in data property
+                        const responseData = response?.data;
+                        const checkForError = (data: any): boolean => {
+                            if (!data) return false;
+                            const errorStr = typeof data === 'string' 
+                                ? data 
+                                : JSON.stringify(data);
+                            return errorStr.toLowerCase().includes('could not get relay server');
+                        };
+                        
+                        if (checkForError(responseData)) {
+                            this.log.warn("Relay server not found - server may have been deleted");
+                            Server().emitToUI("relay-server-not-found", {
+                                message: "Your relay server no longer exists. Please set up a new relay server."
+                            });
+                        } else {
+                            // Heartbeat successful - relay server exists
+                            this.log.debug("Heartbeat successful - relay server is active");
+                            Server().emitToUI("relay-server-found", {
+                                message: "Relay server is connected and active."
+                            });
+                        }
+                    })
+                    .catch(ex => {
+                        // Check error response for relay server deletion
+                        const errorData = ex?.response?.data;
+                        const errorMessage = typeof errorData === 'string' 
+                            ? errorData 
+                            : errorData?.message || errorData?.error || ex?.message || '';
+                        
+                        // Check if error message contains the relay server deletion message
+                        if (errorMessage.toLowerCase().includes('could not get relay server')) {
+                            this.log.warn("Relay server not found - server may have been deleted");
+                            Server().emitToUI("relay-server-not-found", {
+                                message: "Your relay server no longer exists. Please set up a new relay server."
+                            });
+                        } else {
+                            // Log other errors as debug
+                            this.log.debug(`Failed to dispatch "${event.type}" event to webhook: ${i.url}`);
+                            this.log.debug(`  -> Error: ${ex?.message ?? String(ex)}`);
+                            this.log.debug(`  -> Status Text: ${ex?.response?.statusText}`);
+                        }
+                    });
+            } else {
+                // For non-heartbeat events, just log errors
+                this.sendPost(i.url, event).catch(ex => {
+                    this.log.debug(`Failed to dispatch "${event.type}" event to webhook: ${i.url}`);
+                    this.log.debug(`  -> Error: ${ex?.message ?? String(ex)}`);
+                    this.log.debug(`  -> Status Text: ${ex?.response?.statusText}`);
+                });
+            }
         }
     }
 

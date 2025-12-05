@@ -14,6 +14,10 @@ import {
     MenuButton,
     MenuList,
     MenuItem,
+    Alert,
+    AlertIcon,
+    AlertTitle,
+    AlertDescription,
 } from '@chakra-ui/react';
 import { FiRefreshCw, FiServer, FiMoreVertical, FiRotateCcw } from 'react-icons/fi';
 import { AiOutlineClear } from 'react-icons/ai';
@@ -22,6 +26,7 @@ import { resetApp } from '../../actions/GeneralActions';
 import { clear as clearLogs } from '../../slices/LogsSlice';
 import { getConfig } from '../../utils/IpcUtils';
 import { ConfirmationDialog } from '../../components/modals/ConfirmationDialog';
+import { ipcRenderer } from 'electron';
 
 export const SimplifiedNavigation = (): JSX.Element => {
     const dispatch = useAppDispatch();
@@ -29,6 +34,7 @@ export const SimplifiedNavigation = (): JSX.Element => {
     const [lastSync, setLastSync] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [showResetDialog, setShowResetDialog] = useState(false);
+    const [relayNotFoundMessage, setRelayNotFoundMessage] = useState<string | null>(null);
     const resetDialogRef = useRef<HTMLButtonElement>(null);
 
     // Get real logs from Redux store
@@ -73,6 +79,30 @@ export const SimplifiedNavigation = (): JSX.Element => {
         };
 
         checkServerConfig();
+
+        // Listen for relay server not found events
+        const handleRelayNotFound = (_: any, data: any) => {
+            console.warn('Relay server not found, setting disconnected state');
+            setIsConnected(false);
+            setRelayNotFoundMessage(data.message || 'Your relay server no longer exists. Please set up a new relay server.');
+        };
+
+        // Listen for relay server found events (successful heartbeat)
+        const handleRelayFound = (_: any, data: any) => {
+            console.log('Relay server found, setting connected state');
+            setIsConnected(true);
+            setRelayNotFoundMessage(null);
+            setLastSync(new Date().toLocaleTimeString());
+        };
+
+        ipcRenderer.on('relay-server-not-found', handleRelayNotFound);
+        ipcRenderer.on('relay-server-found', handleRelayFound);
+
+        // Cleanup listeners on unmount
+        return () => {
+            ipcRenderer.removeListener('relay-server-not-found', handleRelayNotFound);
+            ipcRenderer.removeListener('relay-server-found', handleRelayFound);
+        };
     }, []);
 
     const handleResetClick = () => {
@@ -115,6 +145,17 @@ export const SimplifiedNavigation = (): JSX.Element => {
             p={8}
         >
             <VStack spacing={8} maxW="1200px" mx="auto">
+                {/* Relay Server Not Found Alert */}
+                {relayNotFoundMessage && (
+                    <Alert status="error" borderRadius="md">
+                        <AlertIcon />
+                        <Box flex="1">
+                            <AlertTitle>Relay Server Not Found</AlertTitle>
+                            <AlertDescription>{relayNotFoundMessage}</AlertDescription>
+                        </Box>
+                    </Alert>
+                )}
+
                 {/* Header */}
                 <Flex w="100%" justifyContent="space-between" alignItems="center">
                     <HStack spacing={4}>
