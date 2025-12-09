@@ -32,11 +32,11 @@ import {
     Badge,
     Divider
 } from '@chakra-ui/react';
-import { FiHome, FiSettings, FiMenu, FiBell, FiGithub, FiMessageCircle, FiTrash } from 'react-icons/fi';
-import { FaDiscord, FaGoogle } from 'react-icons/fa';
-import { AiOutlineBug, AiOutlineHome, AiOutlineApi, AiOutlineHeart, AiOutlineDownload } from 'react-icons/ai';
+import { FiHome, FiSettings, FiMenu, FiBell, FiGithub, FiTrash } from 'react-icons/fi';
+import { FaGoogle } from 'react-icons/fa';
+import { AiOutlineBug, AiOutlineApi, AiOutlineDownload } from 'react-icons/ai';
 import { BsChevronDown, BsCheckAll, BsBook, BsPersonCircle, BsFillCalendarCheckFill, BsPhone } from 'react-icons/bs';
-import { MdOutlineAttachMoney, MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md';
+import { MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md';
 import { IconType } from 'react-icons';
 
 import { ContactsLayout } from 'app/layouts/contacts/ContactsLayout';
@@ -193,7 +193,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         >
             <Flex h="20" alignItems="center" mx="6" justifyContent="flex-start">
                 <img src={logo} className="logo" alt="logo" height={48} />
-                <Text fontSize="1xl" ml={2}>BlueBubbles</Text>
+                <Text fontSize="1xl" ml={2}>Markso Relay</Text>
                 <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
             </Flex>
             {LinkItems.map(link => (
@@ -306,33 +306,8 @@ const MobileNav = ({ onOpen, onNotificationOpen, unreadCount, ...rest }: MobileP
                         >v{updateVersion}</Badge>
                     </Box>
                 ): null}
-                <Tooltip label="Website Home" aria-label="website-tip">
-                    <Link href="https://bluebubbles.app" style={{ textDecoration: 'none' }} target="_blank">
-                        <IconButton size="lg" variant="ghost" aria-label="website" icon={<AiOutlineHome />} />
-                    </Link>
-                </Tooltip>
-                <Tooltip label="BlueBubbles Web" aria-label="web-tip">
-                    <Link href="https://bluebubbles.app/web" style={{ textDecoration: 'none' }} target="_blank">
-                        <IconButton size="lg" variant="ghost" aria-label="bluebubbles web" icon={<FiMessageCircle />} />
-                    </Link>
-                </Tooltip>
-                <Tooltip label="Sponsor Us" aria-label="sponsor-tip">
-                    <Link href="https://github.com/sponsors/BlueBubblesApp" style={{ textDecoration: 'none' }} target="_blank">
-                        <IconButton size="lg" variant="ghost" aria-label="donate" icon={<AiOutlineHeart />} />
-                    </Link>
-                </Tooltip>
-                <Tooltip label="Support Us" aria-label="donate-tip">
-                    <Link href="https://bluebubbles.app/donate" style={{ textDecoration: 'none' }} target="_blank">
-                        <IconButton size="lg" variant="ghost" aria-label="donate" icon={<MdOutlineAttachMoney />} />
-                    </Link>
-                </Tooltip>
-                <Tooltip label="Join our Discord" aria-label="discord-tip">
-                    <Link href="https://discord.gg/yC4wr38" style={{ textDecoration: 'none' }} target="_blank">
-                        <IconButton size="lg" variant="ghost" aria-label="discord" icon={<FaDiscord />} />
-                    </Link>
-                </Tooltip>
-                <Tooltip label="Read our Source Code" aria-label="github-tip">
-                    <Link href="https://github.com/BlueBubblesApp" style={{ textDecoration: 'none' }} target="_blank">
+                <Tooltip label="View Source Code" aria-label="github-tip">
+                    <Link href="https://github.com/marksohq/markso-imessage-relay" style={{ textDecoration: 'none' }} target="_blank">
                         <IconButton size="lg" variant="ghost" aria-label="github" icon={<FiGithub />} />
                     </Link>
                 </Tooltip>
