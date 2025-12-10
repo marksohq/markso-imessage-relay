@@ -10,16 +10,7 @@ TOKEN="$1"
 # Use official cloudflared release for macOS - installs to SYSTEM, not app
 CLOUDFLARED_BIN="/usr/local/bin/cloudflared"
 
-# Per-user configuration
-CURRENT_USER=$(whoami)
-USER_ID=$(id -u)
-SERVICE_NAME="com.cloudflare.cloudflared.${CURRENT_USER}"
-PLIST_PATH="$HOME/Library/LaunchAgents/${SERVICE_NAME}.plist"
-
-echo "🔧 Installing cloudflared service for user: $CURRENT_USER..."
-
-# Ensure LaunchAgents directory exists
-mkdir -p "$HOME/Library/LaunchAgents"
+echo "🔧 Installing cloudflared service..."
 
 # Detect CPU architecture
 ARCH=$(uname -m)
@@ -43,7 +34,7 @@ else
   # Remove broken/corrupted cloudflared if it exists
   if [ -f "$CLOUDFLARED_BIN" ]; then
     echo "⚠️  Removing corrupted cloudflared binary..."
-    sudo rm -f "$CLOUDFLARED_BIN"
+    rm -f "$CLOUDFLARED_BIN"
   fi
   echo "📦 cloudflared not found, installing from app bundle..."
   
@@ -69,8 +60,8 @@ else
     
     # Verify the binary is actually a Mach-O executable
     if file "$APP_CLOUDFLARED" | grep -q "Mach-O.*executable"; then
-      sudo cp "$APP_CLOUDFLARED" "$CLOUDFLARED_BIN"
-      sudo chmod +x "$CLOUDFLARED_BIN"
+      cp "$APP_CLOUDFLARED" "$CLOUDFLARED_BIN"
+      chmod +x "$CLOUDFLARED_BIN"
       echo "✅ cloudflared installed to $CLOUDFLARED_BIN"
     else
       echo "❌ File at $APP_CLOUDFLARED is not a valid executable"
@@ -89,62 +80,38 @@ else
   fi
 fi
 
-# 2) Unload existing user service if it exists
-if launchctl list 2>/dev/null | grep -q "$SERVICE_NAME"; then
-  echo "⚠️  Existing service found for $CURRENT_USER, unloading..."
-  launchctl unload "$PLIST_PATH" 2>/dev/null || true
+# Check if service is already running and remove it completely
+if launchctl list | grep -q "com.cloudflare.cloudflared"; then
+  echo "⚠️  cloudflared service already exists, removing old service..."
+  launchctl bootout system/com.cloudflare.cloudflared || true
   sleep 1
 fi
 
-# Remove old plist if it exists
-if [ -f "$PLIST_PATH" ]; then
-  echo "🗑️  Removing existing plist..."
-  rm -f "$PLIST_PATH"
+# Also check for any existing cloudflared service files and remove them
+if [ -f "/Library/LaunchDaemons/com.cloudflare.cloudflared.plist" ]; then
+  echo "🗑️  Removing existing cloudflared service files..."
+  rm -f /Library/LaunchDaemons/com.cloudflare.cloudflared.plist || true
 fi
 
-# 3) Create the LaunchAgent plist for this user
-echo "📝 Creating LaunchAgent plist at $PLIST_PATH..."
+# Try to uninstall any existing cloudflared service first
+echo "🧹 Cleaning up any existing cloudflared installation..."
+cloudflared service uninstall 2>/dev/null || true
 
-cat > "$PLIST_PATH" << EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>${SERVICE_NAME}</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>${CLOUDFLARED_BIN}</string>
-        <string>tunnel</string>
-        <string>run</string>
-        <string>--token</string>
-        <string>${TOKEN}</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-    <key>StandardOutPath</key>
-    <string>${HOME}/Library/Logs/cloudflared-${CURRENT_USER}.log</string>
-    <key>StandardErrorPath</key>
-    <string>${HOME}/Library/Logs/cloudflared-${CURRENT_USER}.error.log</string>
-</dict>
-</plist>
-EOF
+# 2) Run service install using the token
+echo "🚀 Installing cloudflared service with tunnel token..."
+cloudflared service install "$TOKEN"
 
-# 4) Load the service for this user
-echo "🚀 Loading cloudflared service for $CURRENT_USER..."
-launchctl load "$PLIST_PATH"
+# 3) Start the service
+echo "▶️  Starting cloudflared service..."
+launchctl enable system/com.cloudflare.cloudflared || true
+launchctl kickstart -k system/com.cloudflare.cloudflared || true
 
-# 5) Wait a moment and verify
+# 4) Wait a moment and verify
 sleep 2
-if launchctl list 2>/dev/null | grep -q "$SERVICE_NAME"; then
-  echo "✅ cloudflared service installed and started successfully for $CURRENT_USER"
-  echo "   Service name: $SERVICE_NAME"
-  echo "   Plist: $PLIST_PATH"
-  echo "   Logs: ~/Library/Logs/cloudflared-${CURRENT_USER}.log"
+if launchctl list | grep -q "com.cloudflare.cloudflared"; then
+  echo "✅ cloudflared service installed and started successfully"
   exit 0
 else
-  echo "⚠️  cloudflared service may not be running. Check with: launchctl list | grep cloudflared"
+  echo "⚠️  cloudflared service may not be running. Check with: sudo launchctl list | grep cloudflare"
   exit 0
 fi
