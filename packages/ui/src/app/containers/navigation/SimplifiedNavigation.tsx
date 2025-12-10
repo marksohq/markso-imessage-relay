@@ -88,7 +88,7 @@ export const SimplifiedNavigation = (): JSX.Element => {
         };
 
         // Listen for relay server found events (successful heartbeat)
-        const handleRelayFound = (_: any, data: any) => {
+        const handleRelayFound = () => {
             console.log('Relay server found, setting connected state');
             setIsConnected(true);
             setRelayNotFoundMessage(null);
