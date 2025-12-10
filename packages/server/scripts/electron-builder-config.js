@@ -2,7 +2,7 @@
 // Making them relative to the scripts folder will break the commands
 module.exports = {
     "productName": "Markso Nurture",
-    "appId": "com.markso.markso-imessage-relay",
+    "appId": "com.markso.nurture",
     "npmRebuild": true,
     "directories": {
         "output": "releases",

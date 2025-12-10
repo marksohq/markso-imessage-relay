@@ -65,7 +65,7 @@ if (process.env.NODE_ENV === "production") {
 // Only 1 instance is allowed
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
-    console.error("Markso is already running! Quiting...");
+    console.error("Markso Nurture is already running! Quiting...");
     app.exit(0);
 } else {
     app.on("second-instance", (_, __, ___) => {

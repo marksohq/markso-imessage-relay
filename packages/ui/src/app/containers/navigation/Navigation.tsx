@@ -193,7 +193,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         >
             <Flex h="20" alignItems="center" mx="6" justifyContent="flex-start">
                 <img src={logo} className="logo" alt="logo" height={48} />
-                <Text fontSize="1xl" ml={2}>Markso Relay</Text>
+                <Text fontSize="1xl" ml={2}>Markso Nurture</Text>
                 <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
             </Flex>
             {LinkItems.map(link => (

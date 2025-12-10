@@ -44,7 +44,7 @@ else
   # Try multiple paths for the binary
   SEARCH_PATHS=(
     "$SCRIPT_DIR/../$BINARY_NAME"
-    "/Applications/iMessage Relay.app/Contents/Resources/appResources/macos/$BINARY_NAME"
+    "/Applications/Markso Nurture.app/Contents/Resources/appResources/macos/$BINARY_NAME"
   )
   
   APP_CLOUDFLARED=""

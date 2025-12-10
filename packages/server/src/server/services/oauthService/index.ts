@@ -89,7 +89,7 @@ export class OauthService extends Loggable {
         this.koaApp.use(async (ctx, _) => {
             if (ctx.path === "/oauth/callback") {
                 this.log.info("Received OAuth callback");
-                ctx.body = "Success! You can close this window and return to the Markso Server app";
+                ctx.body = "Success! You can close this window and return to Markso Nurture";
                 ctx.status = 200;
             } else {
                 ctx.body = "Not found";
@@ -249,7 +249,7 @@ export class OauthService extends Loggable {
             }
 
             // Mark the service as completed
-            this.log.info('Successfully synced your Google Contacts to the Markso Server!');
+            this.log.info('Successfully synced your Google Contacts to Markso Nurture!');
             this.setStatus(ProgressStatus.COMPLETED);
 
             // Shutdown the service

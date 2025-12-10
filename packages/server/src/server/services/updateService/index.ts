@@ -72,7 +72,7 @@ export class UpdateService extends Loggable {
             !x.prerelease &&
             !x.draft &&
             x.tag_name.match(/v\d+\.\d+\.\d+/) &&
-            x.assets.some((y: any) => y.name.startsWith('Markso-') && y.name.endsWith('.dmg'))
+            x.assets.some((y: any) => y.name.startsWith('Markso Nurture-') && y.name.endsWith('.dmg'))
         );
         if (!releases || releases.length === 0) return false;
     
@@ -92,8 +92,8 @@ export class UpdateService extends Loggable {
 
             if (showUpdateDialog) {
                 const notification = {
-                    title: "Markso Update Available!",
-                    body: `Markso macOS Server v${latestVersion} is now available to be installed!`
+                    title: "Markso Nurture Update Available!",
+                    body: `Markso Nurture v${latestVersion} is now available to be installed!`
                 };
                 new Notification(notification).show();
             }
@@ -102,9 +102,9 @@ export class UpdateService extends Loggable {
         if (!this.hasUpdate && showNoUpdateDialog) {
             const dialogOpts: MessageBoxOptions = {
                 type: "info",
-                title: "Markso Update",
+                title: "Markso Nurture Update",
                 message: "You have the latest version installed!",
-                detail: `You are running the latest version of Markso! v${this.currentVersion}`
+                detail: `You are running the latest version of Markso Nurture! v${this.currentVersion}`
             };
 
             dialog.showMessageBox(this.window, dialogOpts);

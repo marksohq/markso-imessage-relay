@@ -68,7 +68,7 @@ export class FileSystem {
         "Library",
         "Messages",
         "Attachments",
-        "Markso"
+        "Markso Nurture"
     );
 
     public static attachmentCacheDir = path.join(FileSystem.baseDir, "Attachments", "Cached");
@@ -728,7 +728,7 @@ export class FileSystem {
     <dict>
         <key>AssociatedBundleIdentifiers</key>
         <array>
-            <string>com.markso.markso-imessage-relay</string>
+            <string>com.markso.nurture</string>
         </array>
         <key>Label</key>
         <string>com.markso.server</string>

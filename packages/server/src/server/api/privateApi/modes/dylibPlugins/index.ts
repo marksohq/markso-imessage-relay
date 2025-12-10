@@ -69,7 +69,7 @@ export abstract class DylibPlugin extends Loggable {
 
         if (!fs.existsSync(this.parentProcessPath)) {
             throw new Error(
-                `Unable to locate ${this.name} parent process! Please give the Markso Server Full Disk Access.`
+                `Unable to locate ${this.name} parent process! Please give Markso Nurture Full Disk Access.`
             );
         }
     }

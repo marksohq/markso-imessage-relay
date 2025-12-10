@@ -412,10 +412,10 @@ class MarksoServer extends EventEmitter {
             const dialogOpts: MessageBoxOptions = {
                 type: "error",
                 buttons: ["Restart", "Open System Preferences", "Ignore"],
-                title: "Markso Error",
+                title: "Markso Nurture Error",
                 message: "Full-Disk Access Permission Required!",
                 detail:
-                    `In order to function correctly, Markso requires full-disk access. ` +
+                    `In order to function correctly, Markso Nurture requires full-disk access. ` +
                     `Please enable Full-Disk Access in System Preferences > Security & Privacy.`
             };
 
@@ -953,7 +953,7 @@ class MarksoServer extends EventEmitter {
         if (contactStatus === "Denied") {
             this.logger.debug(
                 "Contacts authorization status is denied! You may need to manually " +
-                    "allow Markso to access your contacts."
+                    "allow Markso Nurture to access your contacts."
             );
         } else {
             this.logger.debug(`Contacts authorization status: ${contactStatus}`);
@@ -965,8 +965,8 @@ class MarksoServer extends EventEmitter {
             const mfHelperExists = await FileSystem.processIsRunning("MacForgeHelper");
             if (mfExists || mfHelperExists) {
                 this.logger.warn(
-                    "MacForge detected! Markso no longer requires MacForge, " +
-                        "and it may cause issues running it alongside Markso. We " +
+                    "MacForge detected! Markso Nurture no longer requires MacForge, " +
+                        "and it may cause issues running it alongside Markso Nurture. We " +
                         "recommend uninstalling MacForge and then rebooting your Mac."
                 );
             }
@@ -1267,14 +1267,14 @@ class MarksoServer extends EventEmitter {
             {
                 name: "Accessibility (Optional)",
                 pass: systemPreferences.isTrustedAccessibilityClient(false),
-                solution: "Open System Preferences > Security > Privacy > Accessibility, then add Markso"
+                solution: "Open System Preferences > Security > Privacy > Accessibility, then add Markso Nurture"
             },
             {
                 name: "Full Disk Access",
                 pass: this.hasDiskAccess,
                 solution:
                     "Open System Preferences > Security > Privacy > Full Disk Access, " +
-                    "then add Markso. Lastly, restart Markso."
+                    "then add Markso Nurture. Lastly, restart Markso Nurture."
             }
         ];
 

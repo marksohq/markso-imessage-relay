@@ -35,7 +35,7 @@ export class AppWindow extends Window {
         }
 
         this.instance = new BrowserWindow({
-            title: "Markso Server",
+            title: "Markso Nurture",
             useContentSize: true,
             width: 1080,
             minWidth: 850,

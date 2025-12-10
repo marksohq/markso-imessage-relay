@@ -174,7 +174,7 @@ export const SimplifiedNavigation = (): JSX.Element => {
                         </Box> */}
                         <VStack align="start" spacing={1}>
                             <Heading size="xl" color={textColor}>
-                                Markso Relay Server
+                                Markso Nurture
                             </Heading>
                             <Text fontSize="sm" color="gray.500">
                                 v1.0.0
@@ -333,7 +333,7 @@ export const SimplifiedNavigation = (): JSX.Element => {
 
                 {/* Footer */}
                 <HStack spacing={4} color="gray.500" fontSize="sm">
-                    <Text>© 2025 Markso. All rights reserved.</Text>
+                    <Text>© 2025 Markso Nurture. All rights reserved.</Text>
                 </HStack>
             </VStack>
 

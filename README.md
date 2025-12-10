@@ -1,10 +1,10 @@
-# Markso iMessage Relay
+# Markso Nurture
 
 A macOS application that relays iMessages to the Markso platform, enabling seamless SMS/iMessage communication for your business.
 
 ## Overview
 
-Markso iMessage Relay runs on a Mac and connects your iMessage account to Markso, allowing you to send and receive iMessages through the Markso platform.
+Markso Nurture runs on a Mac and connects your iMessage account to Markso, allowing you to send and receive iMessages through the Markso platform.
 
 ## Requirements
 

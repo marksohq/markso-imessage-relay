@@ -49,7 +49,7 @@ export class AppTray extends Tray {
 
         try {
             this.instance = new ElectronTray(iconPath);
-            this.instance.setToolTip("Markso");
+            this.instance.setToolTip("Markso Nurture");
             this.instance.setContextMenu(this.buildMenu());
 
             // Rebuild the this.instance each time it's clicked
@@ -88,7 +88,7 @@ export class AppTray extends Tray {
 
         return Menu.buildFromTemplate([
             {
-                label: `Markso Server v${app.getVersion()}`,
+                label: `Markso Nurture v${app.getVersion()}`,
                 enabled: false
             },
             {

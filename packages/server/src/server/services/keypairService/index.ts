@@ -9,8 +9,8 @@ import { uuidv4 } from '@firebase/util';
  */
 export class KeypairService {
     private static initialized = false;
-    private static readonly DEVICE_SERVICE = 'com.imessagerelay.device';
-    private static readonly SERVER_SERVICE = 'com.imessagerelay.server';
+    private static readonly DEVICE_SERVICE = 'com.markso.nurture.device';
+    private static readonly SERVER_SERVICE = 'com.markso.nurture.server';
     private static readonly ACCOUNT_PRIVATE = 'device_private_key';
     private static readonly ACCOUNT_PUBLIC = 'device_public_key';
     private static readonly ACCOUNT_DEVICE_ID = 'device_id';

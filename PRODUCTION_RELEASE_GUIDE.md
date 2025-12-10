@@ -1,12 +1,12 @@
-# Production Release Guide for Markso Server
+# Production Release Guide for Markso Nurture
 
 ## Overview
 
-This guide explains how to build and release the Markso Server app for production with auto-updates via GitHub releases.
+This guide explains how to build and release the Markso Nurture app for production with auto-updates via GitHub releases.
 
 ## Prerequisites
 
-1. **GitHub Repository**: `marksohq/imessage-relay`
+1. **GitHub Repository**: `marksohq/markso-imessage-relay`
 2. **GitHub Token**: For publishing releases (set as `GH_TOKEN` environment variable)
 3. **Code Signing** (optional but recommended):
    - Apple Developer Account
@@ -18,10 +18,10 @@ This guide explains how to build and release the Markso Server app for productio
 ### Electron Builder Config
 
 The app is configured in `packages/server/scripts/electron-builder-config.js`:
-- **Product Name**: Markso
-- **App ID**: `com.markso.imessage-relay`
-- **GitHub Repo**: `marksohq/imessage-relay`
-- **Release Type**: Draft (change to `release` for public releases)
+- **Product Name**: Markso Nurture
+- **App ID**: `com.markso.nurture`
+- **GitHub Repo**: `marksohq/markso-imessage-relay`
+- **Release Type**: release
 
 ### Environment Variables
 
@@ -57,7 +57,7 @@ npm run build
 This will:
 1. Build the UI with production API URL
 2. Build the server
-3. Create DMG files in `packages/server/releases/`
+3. Create DMG files in `dist/`
 
 ### Step 3: Create GitHub Release
 
@@ -70,13 +70,13 @@ npm run release  # This builds AND publishes to GitHub
 
 **Option B: Manual Release**
 1. Build the app: `npm run build`
-2. Go to GitHub: https://github.com/marksohq/imessage-relay/releases
+2. Go to GitHub: https://github.com/marksohq/markso-imessage-relay/releases
 3. Click "Draft a new release"
 4. Tag: `v1.0.0` (must match version in package.json)
 5. Title: `v1.0.0` or descriptive title
-6. Upload DMG files from `packages/server/releases/`:
-   - `Markso-1.0.0-arm64.dmg` (Apple Silicon)
-   - `Markso-1.0.0-x64.dmg` (Intel)
+6. Upload DMG files from `dist/`:
+   - `Markso Nurture-1.0.0-arm64.dmg` (Apple Silicon)
+   - `Markso Nurture-1.0.0.dmg` (Intel)
 7. Publish release
 
 ### Step 4: Verify Auto-Updates
@@ -119,7 +119,7 @@ Users can enable/disable update checks via the config:
 
 ## Important Notes
 
-1. **DMG Naming**: The app looks for DMG files named `Markso-{version}-{arch}.dmg`
+1. **DMG Naming**: The app looks for DMG files named `Markso Nurture-{version}*.dmg`
 2. **Version Format**: Must follow semver (e.g., `1.0.0`, `1.0.1`)
 3. **GitHub Tags**: Must be prefixed with `v` (e.g., `v1.0.0`)
 4. **Release Type**: Set `releaseType: "release"` in electron-builder config for public releases
@@ -128,13 +128,12 @@ Users can enable/disable update checks via the config:
 ## Troubleshooting
 
 **Updates not detected:**
-- Check GitHub repo URL matches: `marksohq/imessage-relay`
+- Check GitHub repo URL matches: `marksohq/markso-imessage-relay`
 - Verify release is published (not draft)
 - Check DMG file naming matches pattern
 - Verify version format is correct
 
 **Build fails:**
 - Ensure all dependencies are installed: `npm install`
-- Check Node.js version matches `devEngines` in package.json
+- Check Node.js version (v20.x recommended)
 - Verify electron-builder config is correct
-

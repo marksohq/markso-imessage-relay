@@ -1,7 +1,7 @@
 {
-    "name": "markso-imessage-relay",
+    "name": "markso-nurture",
     "version": "1.0.0",
-    "description": "iMessage Relay Server - Simplified iMessage relay service",
+    "description": "Markso Nurture - iMessage relay service for Markso",
     "private": true,
     "workspaces": [
         "packages/*"
@@ -27,5 +27,8 @@
     },
     "devDependencies": {
         "concurrently": "^7.0.0"
+    },
+    "dependencies": {
+        "electron": "^39.2.6"
     }
 }

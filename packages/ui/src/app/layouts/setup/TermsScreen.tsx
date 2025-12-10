@@ -21,7 +21,7 @@ export const TermsScreen: React.FC<TermsScreenProps> = ({ onAccept }) => {
     const textColor = useColorModeValue('gray.800', 'gray.200');
 
     const termsText = `
-MARKSO IMESSAGE RELAY SERVICE TERMS OF SERVICE
+MARKSO NURTURE SERVICE TERMS OF SERVICE
 
 1. ACCEPTANCE OF TERMS
 By using this iMessage relay service, you agree to be bound by these Terms of Service.
@@ -74,7 +74,7 @@ These terms are governed by the laws of the jurisdiction in which the service pr
         >
             <VStack spacing={6} maxW="800px" w="100%">
                 <Heading size="2xl" textAlign="center" color={textColor}>
-                    Welcome to Markso Relay
+                    Welcome to Markso Nurture
                 </Heading>
                 
                 <Text fontSize="lg" textAlign="center" color={textColor}>

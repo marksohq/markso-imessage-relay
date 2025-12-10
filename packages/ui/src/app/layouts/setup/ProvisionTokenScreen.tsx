@@ -320,7 +320,7 @@ export const ProvisionTokenScreen: React.FC<ProvisionTokenScreenProps> = ({ onCo
 
                         <VStack spacing={4} w="100%">
                             <Text fontSize="sm" color="gray.600" textAlign="center">
-                                Enter your authentication token to connect to the Markso relay service
+                                Enter your authentication token to connect to the Markso Nurture service
                             </Text>
 
                             <InputGroup>
