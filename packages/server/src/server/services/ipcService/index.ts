@@ -308,31 +308,36 @@ export class IPCService extends Loggable {
                 const fs = require('fs');
                 
                 // Path to the install script
-                // __dirname is: packages/server/dist/
-                // Script is at: packages/server/appResources/macos/scripts/install_cloudflared_service.sh
-                // From dist/ go to sibling appResources/ folder
-                const scriptPath = path.join(__dirname, '../appResources/macos/scripts/install_cloudflared_service.sh');
+                // Use FileSystem.resources which correctly handles both dev and production paths
+                // In production: Contents/Resources/appResources/macos/scripts/install_cloudflared_service.sh
+                // In development: packages/server/appResources/macos/scripts/install_cloudflared_service.sh
+                const scriptPath = path.join(FileSystem.resources, 'macos', 'scripts', 'install_cloudflared_service.sh');
                 
                 log.info(`Looking for install script at: ${scriptPath}`);
-                log.info(`__dirname is: ${__dirname}`);
+                log.info(`FileSystem.resources is: ${FileSystem.resources}`);
                 
                 if (!fs.existsSync(scriptPath)) {
                     log.error(`Install script not found at: ${scriptPath}`);
-                    
-                    // Try alternate path for production
-                    const altPath = path.join(process.resourcesPath || '', 'appResources/macos/scripts/install_cloudflared_service.sh');
-                    log.error(`Also tried: ${altPath}`);
-                    log.error(`Exists: ${fs.existsSync(altPath)}`);
-                    
                     return { success: false, error: "Install script not found" };
                 }
 
                 // Make script executable
                 fs.chmodSync(scriptPath, '755');
                 
-                // Use osascript to prompt for admin password and run with sudo
-                // This shows the native macOS password prompt
-                const command = `osascript -e 'do shell script "bash \\"${scriptPath}\\" \\"${tunnelToken}\\"" with administrator privileges'`;
+                // Pass the resources path as an environment variable so the script can find the binaries
+                const resourcesPath = FileSystem.resources;
+                
+                // Build the shell command with double quotes (normal shell syntax)
+                const shellCommand = `export APP_RESOURCES_PATH="${resourcesPath}" && bash "${scriptPath}" "${tunnelToken}"`;
+                
+                // Escape the entire shell command for AppleScript's double-quoted string
+                // AppleScript uses: do shell script "..." 
+                // We need to escape: \ becomes \\, " becomes \"
+                const escapedCommand = shellCommand
+                    .replace(/\\/g, '\\\\')  // Escape backslashes: \ -> \\
+                    .replace(/"/g, '\\"');    // Escape double quotes: " -> \"
+                
+                const command = `osascript -e 'do shell script "${escapedCommand}" with administrator privileges'`;
                 
                 log.info("Requesting admin privileges for cloudflared installation...");
                 const output = execSync(command, { 

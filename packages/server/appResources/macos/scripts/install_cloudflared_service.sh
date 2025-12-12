@@ -41,17 +41,38 @@ else
   # Find the script directory
   SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
   
+  # Get resources path from environment variable (passed from Electron app)
+  # Fallback to script-relative path or hardcoded path
+  if [ -n "${APP_RESOURCES_PATH:-}" ]; then
+    RESOURCES_BASE="$APP_RESOURCES_PATH"
+    echo "   Using APP_RESOURCES_PATH: $RESOURCES_BASE"
+  else
+    # Try to find resources relative to script
+    RESOURCES_BASE="$SCRIPT_DIR/.."
+    echo "   APP_RESOURCES_PATH not set, using script-relative path: $RESOURCES_BASE"
+  fi
+  
   # Try multiple paths for the binary
   SEARCH_PATHS=(
+    "$RESOURCES_BASE/macos/$BINARY_NAME"
     "$SCRIPT_DIR/../$BINARY_NAME"
     "/Applications/Markso Nurture.app/Contents/Resources/appResources/macos/$BINARY_NAME"
   )
+  
+  echo "   Searching for binary: $BINARY_NAME"
+  echo "   Search paths:"
+  for PATH_TO_TRY in "${SEARCH_PATHS[@]}"; do
+    echo "     - $PATH_TO_TRY"
+  done
   
   APP_CLOUDFLARED=""
   for PATH_TO_TRY in "${SEARCH_PATHS[@]}"; do
     if [ -f "$PATH_TO_TRY" ]; then
       APP_CLOUDFLARED="$PATH_TO_TRY"
+      echo "   ✓ Found at: $PATH_TO_TRY"
       break
+    else
+      echo "   ✗ Not found: $PATH_TO_TRY"
     fi
   done
   
@@ -60,9 +81,26 @@ else
     
     # Verify the binary is actually a Mach-O executable
     if file "$APP_CLOUDFLARED" | grep -q "Mach-O.*executable"; then
-      cp "$APP_CLOUDFLARED" "$CLOUDFLARED_BIN"
-      chmod +x "$CLOUDFLARED_BIN"
-      echo "✅ cloudflared installed to $CLOUDFLARED_BIN"
+      # Ensure /usr/local/bin directory exists
+      if [ ! -d "/usr/local/bin" ]; then
+        echo "   Creating /usr/local/bin directory..."
+        mkdir -p /usr/local/bin || {
+          echo "❌ Failed to create /usr/local/bin directory"
+          exit 4
+        }
+      fi
+      
+      # Copy the binary with error handling
+      echo "   Copying binary to $CLOUDFLARED_BIN..."
+      if cp "$APP_CLOUDFLARED" "$CLOUDFLARED_BIN"; then
+        chmod +x "$CLOUDFLARED_BIN"
+        echo "✅ cloudflared installed to $CLOUDFLARED_BIN"
+      else
+        echo "❌ Failed to copy binary to $CLOUDFLARED_BIN"
+        echo "   Source: $APP_CLOUDFLARED"
+        echo "   Destination: $CLOUDFLARED_BIN"
+        exit 5
+      fi
     else
       echo "❌ File at $APP_CLOUDFLARED is not a valid executable"
       file "$APP_CLOUDFLARED"
@@ -95,11 +133,11 @@ fi
 
 # Try to uninstall any existing cloudflared service first
 echo "🧹 Cleaning up any existing cloudflared installation..."
-cloudflared service uninstall 2>/dev/null || true
+"$CLOUDFLARED_BIN" service uninstall 2>/dev/null || true
 
 # 2) Run service install using the token
 echo "🚀 Installing cloudflared service with tunnel token..."
-cloudflared service install "$TOKEN"
+"$CLOUDFLARED_BIN" service install "$TOKEN"
 
 # 3) Start the service
 echo "▶️  Starting cloudflared service..."
