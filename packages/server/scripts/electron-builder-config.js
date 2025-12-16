@@ -12,6 +12,7 @@ module.exports = {
     "extraResources": [
         "appResources"
     ],
+    "afterPack": "./scripts/adhoc-sign.js",
     "mac": {
         "category": "public.app-category.social-networking",
         "publish": [
@@ -34,13 +35,15 @@ module.exports = {
                 ],
             }
         ],
-        "type": "distribution",
+        "type": "development",
         "icon": "../../icons/macos/dock-icon.png",
         "darkModeSupport": true,
-        "hardenedRuntime": true,
+        "hardenedRuntime": false,
         "notarize": false,
-        "entitlements": "./scripts/entitlements.mac.plist",
-        "entitlementsInherit": "./scripts/entitlements.mac.plist",
+        "sign": false,
+        "identity": null,
+        "entitlements": null,
+        "entitlementsInherit": null,
         "extendInfo": {
             "NSContactsUsageDescription": "Markso Nurture needs access to your Contacts",
             "NSAppleEventsUsageDescription": "Markso Nurture needs access to run AppleScripts",
